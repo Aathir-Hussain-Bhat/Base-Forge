@@ -35,6 +35,10 @@
       --danger: #B44638;
       --danger-soft: #FDF0EE;
 
+      --admin-badge-bg: #FDF3E7;
+      --admin-badge-text: #B45309;
+      --admin-badge-border: rgba(180, 83, 9, 0.2);
+
       --shadow-soft: 0 4px 20px -2px rgba(22, 28, 20, 0.04);
       --shadow-hover: 0 12px 32px -4px rgba(22, 28, 20, 0.08);
 
@@ -66,6 +70,10 @@
 
       --danger: #D9695C;
       --danger-soft: #2D1E1C;
+
+      --admin-badge-bg: #2B2115;
+      --admin-badge-text: #FBBF24;
+      --admin-badge-border: rgba(251, 191, 36, 0.3);
 
       --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
       --shadow-hover: 0 12px 32px -4px rgba(0, 0, 0, 0.55);
@@ -286,6 +294,20 @@
       border-radius: 50%;
       object-fit: cover;
       background: var(--accent-soft);
+    }
+
+    .official-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: var(--radius-pill);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: var(--admin-badge-bg);
+      color: var(--admin-badge-text);
+      border: 1px solid var(--admin-badge-border);
     }
 
     .btn-icon-subtle {
@@ -1149,7 +1171,7 @@
       border-color: transparent;
     }
 
-    /* Owner Controls Bar on Base Details */
+    /* Owner & Admin Controls Bar */
     .owner-controls-bar {
       display: none;
       margin-top: 16px;
@@ -1215,6 +1237,9 @@
       font-weight: 700;
       color: var(--text-main);
       line-height: 1.25;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .base-creator-handle {
@@ -1340,6 +1365,10 @@
       font-weight: 700;
       letter-spacing: -0.02em;
       margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
     .profile-username {
@@ -1382,6 +1411,32 @@
       color: var(--text-subtle);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+    }
+
+    /* Live Profile Preview in Settings */
+    .avatar-preview-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+    }
+
+    .avatar-preview-img {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+    }
+
+    .avatar-preview-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
     }
 
     /* ==========================================================================
@@ -1464,7 +1519,7 @@
     }
 
     /* ==========================================================================
-       10. CREATOR WALL POPUP (GLASS BLUR MODAL)
+       10. CREATOR WALL POPUP
        ========================================================================== */
     .creator-wall-overlay {
       position: fixed;
@@ -2409,7 +2464,7 @@
           <span>Creator</span>
         </button>
 
-        <!-- Auth Controls -->
+        <!-- Auth Slot -->
         <div id="authHeaderSlot">
           <button class="btn-auth-trigger" onclick="openAuthModal('login')">
             <span>Log In</span>
@@ -2462,7 +2517,6 @@
         </div>
       </div>
 
-      <!-- Featured Bases -->
       <div>
         <div class="section-header">
           <h2 class="section-heading">Featured Bases</h2>
@@ -2471,7 +2525,6 @@
         <div class="base-grid" id="featuredGridContainer"></div>
       </div>
 
-      <!-- Recently Viewed -->
       <div id="recentSectionWrapper" style="display: none;">
         <div class="section-header">
           <h2 class="section-heading">Recently Viewed</h2>
@@ -2502,7 +2555,6 @@
             />
           </div>
 
-          <!-- Type Filters -->
           <div class="chip-track" id="categoryChipTrack">
             <button class="category-chip active" data-val="All" onclick="setCategoryFilter('All')">All</button>
             <button class="category-chip" data-val="War" onclick="setCategoryFilter('War')">War</button>
@@ -2512,7 +2564,6 @@
             <button class="category-chip" data-val="Hybrid" onclick="setCategoryFilter('Hybrid')">Hybrid</button>
           </div>
 
-          <!-- Town Hall Filters -->
           <div class="chip-track" id="thChipTrack">
             <button class="th-chip active" data-val="All" onclick="setTownHallFilter('All')">All TH</button>
             <button class="th-chip" data-val="18" onclick="setTownHallFilter(18)">TH18</button>
@@ -2544,14 +2595,12 @@
 
         <div class="base-grid" id="exploreGridContainer"></div>
 
-        <!-- Empty State -->
         <div id="exploreEmptyState" class="empty-block" style="display: none;">
           <div class="empty-block-title">No bases found.</div>
           <p class="empty-block-sub">Try another search or filter.</p>
           <button class="btn-empty-action" onclick="resetAllFilters()">Reset Filters</button>
         </div>
 
-        <!-- Error State -->
         <div id="exploreErrorState" class="empty-block" style="display: none;">
           <div class="empty-block-title" style="color: var(--danger);">Failed to load bases.</div>
           <p class="empty-block-sub" id="exploreErrorMsg">There was an issue connecting to the database.</p>
@@ -2590,7 +2639,6 @@
           <span class="detail-breadcrumb" id="detailBreadcrumb">Explore / TH17 / War</span>
         </div>
 
-        <!-- Large Base Preview -->
         <div class="detail-hero-frame" id="detailHeroContainer" title="Click to view fullscreen">
           <img id="dImage" src="" alt="Clash layout preview">
           <div class="expand-cue">
@@ -2606,22 +2654,16 @@
           </div>
         </div>
 
-        <!-- Base Name -->
         <h1 class="detail-heading" id="dTitle">Base Name</h1>
 
-        <!-- Badges -->
         <div class="detail-meta-tags">
           <span class="detail-th-type-badge" id="dMetaBadge">TH17 &bull; WAR</span>
           <span class="detail-status-badge" id="dStatusBadge" style="display: none;">DRAFT</span>
         </div>
 
-        <!-- Short Description -->
         <p class="detail-lead" id="dDesc">Short summary of base.</p>
-
-        <!-- Tags -->
         <div class="detail-tags-row" id="dTags"></div>
 
-        <!-- Actions -->
         <div class="detail-actions-panel">
           <div class="detail-actions-row">
             <button class="btn-primary-copy" id="dCopyBtn" onclick="handleDetailCopyAction()">
@@ -2653,12 +2695,13 @@
             </div>
           </div>
 
-          <!-- Owner Edit / Delete Controls -->
+          <!-- Owner / Admin Controls Bar -->
           <div class="owner-controls-bar" id="dOwnerControls">
             <div class="owner-controls-left">
-              <span>✦ You created this base</span>
+              <span id="dOwnerControlsLabel">✦ Manage Base</span>
             </div>
             <div class="owner-controls-actions">
+              <button class="btn-settings-action" id="dAdminTogglePublishBtn" style="display: none;" onclick="toggleBasePublishStatus(currentSelectedId)">Toggle Publish</button>
               <button class="btn-settings-action" onclick="openEditBase(currentSelectedId)">Edit</button>
               <button class="btn-settings-action btn-settings-danger" onclick="deleteExistingBase(currentSelectedId)">Delete</button>
             </div>
@@ -2677,9 +2720,12 @@
         <!-- CREATOR SECTION -->
         <div class="base-creator-card" id="baseCreatorCard">
           <div class="base-creator-info" onclick="handleCreatorCardClick()">
-            <img class="base-creator-avatar" id="baseCreatorAvatar" src="" alt="Creator avatar" onerror="this.src=CLEAN_FALLBACK_SVG">
+            <img class="base-creator-avatar" id="baseCreatorAvatar" src="" alt="Creator avatar" onerror="this.onerror=null;this.src=CLEAN_FALLBACK_SVG">
             <div>
-              <div class="base-creator-name" id="baseCreatorName">BaseForge Official</div>
+              <div class="base-creator-name" id="baseCreatorName">
+                <span>BaseForge Official</span>
+                <span class="official-badge-pill" id="baseCreatorOfficialBadge" style="display: none;">OFFICIAL</span>
+              </div>
               <div class="base-creator-handle" id="baseCreatorHandle">@baseforge</div>
               <div class="base-creator-followers" id="baseCreatorFollowers">0 followers</div>
             </div>
@@ -2691,7 +2737,6 @@
           </div>
         </div>
 
-        <!-- BASE INFORMATION -->
         <div class="detail-section-block">
           <h3 class="detail-section-title">BASE INFORMATION</h3>
           <div class="detail-info-grid">
@@ -2710,13 +2755,11 @@
           </div>
         </div>
 
-        <!-- DESCRIPTION -->
         <div class="detail-section-block">
           <h3 class="detail-section-title">DESCRIPTION</h3>
           <p class="detail-body-p" id="dFullDesc"></p>
         </div>
 
-        <!-- RELATED BASES -->
         <div class="detail-section-block">
           <h3 class="detail-section-title">RELATED BASES</h3>
           <div class="base-grid" id="relatedGridContainer"></div>
@@ -2737,8 +2780,11 @@
         </button>
 
         <div class="profile-hero">
-          <img class="profile-avatar-large" id="cpAvatar" src="" alt="Profile Avatar" onerror="this.src=CLEAN_FALLBACK_SVG">
-          <h1 class="profile-display-name" id="cpDisplayName">Creator Name</h1>
+          <img class="profile-avatar-large" id="cpAvatar" src="" alt="Profile Avatar" onerror="this.onerror=null;this.src=CLEAN_FALLBACK_SVG">
+          <h1 class="profile-display-name">
+            <span id="cpDisplayName">Creator Name</span>
+            <span class="official-badge-pill" id="cpOfficialBadge" style="display: none;">OFFICIAL</span>
+          </h1>
           <div class="profile-username" id="cpUsername">@username</div>
           <p class="profile-bio" id="cpBio">Builder & defender.</p>
 
@@ -2773,15 +2819,15 @@
       </div>
     </section>
 
-    <!-- VIEW: SUBMIT / CREATE / EDIT BASE -->
+    <!-- VIEW: CREATE / EDIT BASE -->
     <section id="view-submit" class="view">
       <div class="page-container">
         <div class="page-eyebrow" id="formPageEyebrow">Create</div>
         <h1 class="page-title" id="formPageTitle">Publish a base.</h1>
-        <p class="page-quote" id="formPageQuote">“Share a layout with the community. Every layout is instantly verified and added to the library.”</p>
+        <p class="page-quote" id="formPageQuote">“Share a layout with the community. Every layout is verified and defended across the platform.”</p>
         
         <div class="demo-callout" id="formAuthWarning" style="display: none;">
-          &gt; You must be logged in to create and manage cloud bases.
+          &gt; You must be logged in to create and manage platform bases.
         </div>
 
         <form id="baseSubmitForm" class="card-panel" onsubmit="handleFormSubmission(event)" novalidate>
@@ -2875,7 +2921,6 @@
           </div>
         </form>
 
-        <!-- User Bases List -->
         <div style="margin-top: 40px;">
           <h2 class="section-heading" style="font-size: 1.25rem; margin-bottom: 14px;" id="userBasesHeading">Your Bases &amp; Drafts</h2>
           <div id="userBasesList"></div>
@@ -2888,22 +2933,35 @@
       <div class="page-container">
         <div class="page-eyebrow">Preferences</div>
         <h1 class="page-title">Settings</h1>
-        <p class="page-quote">“Configure visual preferences, account settings, and manage your bases.”</p>
+        <p class="page-quote">“Configure visual preferences, account settings, and profile details.”</p>
 
         <!-- Account Profile Panel -->
         <div class="card-panel" id="settingsProfilePanel" style="display: none;">
-          <div class="card-panel-title">Your Profile</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div class="card-panel-title" style="margin-bottom: 0;">Your Profile</div>
+            <span class="official-badge-pill" id="settingsAdminBadge" style="display: none;">OFFICIAL ADMIN</span>
+          </div>
+
+          <!-- Avatar Preview Box -->
+          <div class="avatar-preview-box">
+            <img class="avatar-preview-img" id="settingsAvatarPreview" src="" alt="Avatar preview" onerror="this.onerror=null;this.src=CLEAN_FALLBACK_SVG">
+            <div>
+              <div style="font-size: 0.88rem; font-weight: 700;" id="settingsPreviewName">Display Name</div>
+              <div class="avatar-preview-text" id="settingsPreviewHandle">@username</div>
+            </div>
+          </div>
+
           <div class="form-field">
             <label class="form-caption" for="setDisplayName">Display Name</label>
-            <input type="text" id="setDisplayName" class="form-text-input">
+            <input type="text" id="setDisplayName" class="form-text-input" oninput="handleProfileFieldPreview()">
           </div>
           <div class="form-field">
             <label class="form-caption" for="setUsername">Username</label>
-            <input type="text" id="setUsername" class="form-text-input" placeholder="letters_numbers_only">
+            <input type="text" id="setUsername" class="form-text-input" placeholder="letters_numbers_only" oninput="handleProfileFieldPreview()">
           </div>
           <div class="form-field">
             <label class="form-caption" for="setAvatarUrl">Avatar URL</label>
-            <input type="url" id="setAvatarUrl" class="form-text-input" placeholder="https://...">
+            <input type="url" id="setAvatarUrl" class="form-text-input" placeholder="https://..." oninput="handleAvatarInputPreview(this.value)">
           </div>
           <div class="form-field">
             <label class="form-caption" for="setBio">Bio</label>
@@ -3093,7 +3151,7 @@
 
         <a href="https://www.instagram.com/bhat_boyka/" target="_blank" rel="noopener noreferrer" class="creator-link-card">
           <div class="creator-link-left">
-            <svg class="creator-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="creator-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
               <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
               <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
@@ -3252,10 +3310,11 @@
        ========================================================================== -->
   <script>
     // --------------------------------------------------------------------------
-    // 1. SUPABASE CLIENT & AUTH STATE
+    // 1. SUPABASE CLIENT & CONSTANTS
     // --------------------------------------------------------------------------
     const SUPABASE_URL = 'https://netjcizmrwfsurmhykth.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_7ML7aYl3i5uawuvNd6cPtA_UAl3aEpT';
+    const OFFICIAL_ADMIN_UUID = '7920d2b1-4b41-446a-a6b2-62868432cdd0';
 
     let supabaseClient = null;
     if (window.supabase && typeof window.supabase.createClient === 'function') {
@@ -3282,9 +3341,10 @@
     // --------------------------------------------------------------------------
     let toastTimeout = null;
     function notifyToast(text) {
+      if (!text) return;
       const toast = document.getElementById('globalToast');
       if (!toast) return;
-      toast.textContent = text;
+      toast.textContent = String(text);
       toast.classList.add('visible');
       if (toastTimeout) clearTimeout(toastTimeout);
       toastTimeout = setTimeout(() => {
@@ -3297,32 +3357,48 @@
     // --------------------------------------------------------------------------
     function copyToClipboard(text, onSuccess, onError) {
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(onSuccess).catch(onError);
+        navigator.clipboard.writeText(text).then(onSuccess).catch(err => {
+          console.error("Base Forge clipboard write failed:", err);
+          fallbackCopyText(text, onSuccess, onError);
+        });
       } else {
-        try {
-          const temp = document.createElement('textarea');
-          temp.value = text;
-          document.body.appendChild(temp);
-          temp.select();
-          document.execCommand('copy');
-          document.body.removeChild(temp);
-          if (onSuccess) onSuccess();
-        } catch (err) {
-          if (onError) onError(err);
-        }
+        fallbackCopyText(text, onSuccess, onError);
+      }
+    }
+
+    function fallbackCopyText(text, onSuccess, onError) {
+      try {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        temp.style.position = 'fixed';
+        temp.style.left = '-9999px';
+        document.body.appendChild(temp);
+        temp.select();
+        const success = document.execCommand('copy');
+        document.body.removeChild(temp);
+        if (success && onSuccess) onSuccess();
+        else if (!success && onError) onError(new Error("Copy command rejected"));
+      } catch (err) {
+        console.error("Base Forge fallback copy failed:", err);
+        if (onError) onError(err);
       }
     }
 
     // --------------------------------------------------------------------------
-    // SAFE STORAGE HELPERS
+    // SAFE STORAGE HELPERS (DEFENSIVE JSON PARSING)
     // --------------------------------------------------------------------------
     function safeGetJSON(key, fallback) {
       try {
         const val = localStorage.getItem(key);
-        if (!val) return fallback;
-        const parsed = JSON.parse(val);
+        if (!val || typeof val !== 'string') return fallback;
+        const trimmed = val.trim();
+        if (!trimmed.startsWith('{') && !trimmed.startsWith('[') && !trimmed.startsWith('"')) {
+          return trimmed || fallback;
+        }
+        const parsed = JSON.parse(trimmed);
         return parsed !== null ? parsed : fallback;
       } catch (err) {
+        console.warn("Base Forge storage parse fallback for key:", key, err);
         return fallback;
       }
     }
@@ -3331,7 +3407,7 @@
       try {
         localStorage.setItem(key, JSON.stringify(data));
       } catch (err) {
-        console.warn('Storage error', err);
+        console.warn('Storage quota or security restriction:', err);
       }
     }
 
@@ -3361,6 +3437,16 @@
       try { localStorage.removeItem('baseforge_recent'); } catch(e){}
       renderRecentlyViewed();
       notifyToast('Recently viewed cleared');
+    }
+
+    // --------------------------------------------------------------------------
+    // ADMIN AUTHORIZATION HELPER
+    // --------------------------------------------------------------------------
+    function isUserAdmin() {
+      if (!currentUser) return false;
+      if (currentUserProfile && currentUserProfile.role === 'admin') return true;
+      if (currentUser.id === OFFICIAL_ADMIN_UUID) return true;
+      return false;
     }
 
     // --------------------------------------------------------------------------
@@ -3419,7 +3505,8 @@
               id,
               username,
               display_name,
-              avatar_url
+              avatar_url,
+              role
             )
           `)
           .order('town_hall', { ascending: false });
@@ -3428,21 +3515,24 @@
 
         supabaseBases = (data || []).map(row => {
           const profile = row.profiles || null;
+          const isOfficial = (!row.creator_id) || (profile && profile.role === 'admin') || (row.creator_id === OFFICIAL_ADMIN_UUID);
+
           return {
-            id: row.id,
-            name: row.name,
-            townHall: row.town_hall,
-            type: row.type,
-            description: row.description,
+            id: String(row.id),
+            name: String(row.name || 'Clash Base'),
+            townHall: Number(row.town_hall) || 16,
+            type: String(row.type || 'War'),
+            description: String(row.description || ''),
             tags: Array.isArray(row.tags) ? row.tags : [],
-            image: row.image,
-            baseLink: row.base_link,
+            image: sanitizeUrl(row.image),
+            baseLink: sanitizeUrl(row.base_link),
             featured: Boolean(row.featured),
             status: row.status || 'published',
             creatorId: row.creator_id || null,
-            creatorName: profile ? profile.display_name : 'BaseForge Official',
-            creatorUsername: profile ? profile.username : 'baseforge',
-            creatorAvatar: profile ? profile.avatar_url : 'https://res.cloudinary.com/prjgzqvy/image/upload/v1786899509/image_1776070140355_zjbr8s.jpg',
+            creatorName: profile ? profile.display_name : (isOfficial ? 'BaseForge Official' : 'Anonymous Builder'),
+            creatorUsername: profile ? profile.username : (isOfficial ? 'baseforge' : 'builder'),
+            creatorAvatar: profile && profile.avatar_url ? sanitizeUrl(profile.avatar_url) : 'https://res.cloudinary.com/prjgzqvy/image/upload/v1786899509/image_1776070140355_zjbr8s.jpg',
+            isOfficialCreator: isOfficial,
             createdAt: row.created_at ? row.created_at.split('T')[0] : ''
           };
         });
@@ -3452,7 +3542,11 @@
         allLayouts = getFullBaseList();
         refreshCurrentView();
       } catch (err) {
-        console.error('[BaseForge] Supabase fetch error:', err);
+        console.error("Base Forge operation failed:", err);
+        console.error("Error name:", err?.name);
+        console.error("Error message:", err?.message);
+        console.error("Error stack:", err?.stack);
+
         basesFetchError = err.message || 'Database connection error';
         isBasesLoading = false;
 
@@ -3467,6 +3561,15 @@
           renderErrorState(basesFetchError);
         }
       }
+    }
+
+    function sanitizeUrl(rawUrl) {
+      if (!rawUrl || typeof rawUrl !== 'string') return '';
+      let clean = rawUrl.trim();
+      if ((clean.startsWith('"') && clean.endsWith('"')) || (clean.startsWith("'") && clean.endsWith("'"))) {
+        clean = clean.substring(1, clean.length - 1).trim();
+      }
+      return clean;
     }
 
     function renderLoadingSkeletons() {
@@ -3540,7 +3643,7 @@
           await fetchUserFollows();
         }
       } catch (err) {
-        console.warn('Session retrieval error:', err);
+        console.error("Failed during session fetch:", err);
       }
 
       renderAuthHeaderState();
@@ -3571,22 +3674,27 @@
 
         if (!error && data) {
           currentUserProfile = data;
+          if (currentUser.id === OFFICIAL_ADMIN_UUID && currentUserProfile.role !== 'admin') {
+            currentUserProfile.role = 'admin';
+          }
         } else {
           const fallbackUsername = (currentUser.email.split('@')[0] + Math.floor(Math.random()*1000)).replace(/[^a-zA-Z0-9_]/g, '');
+          const assignedRole = (currentUser.id === OFFICIAL_ADMIN_UUID) ? 'admin' : 'user';
           const { data: newProf } = await supabaseClient
             .from('profiles')
             .upsert({
               id: currentUser.id,
               username: fallbackUsername,
               display_name: currentUser.email.split('@')[0],
-              avatar_url: ''
+              avatar_url: '',
+              role: assignedRole
             })
             .select()
             .single();
           if (newProf) currentUserProfile = newProf;
         }
       } catch (e) {
-        console.warn('Profile fetch error:', e);
+        console.error("Failed during profile fetch:", e);
       }
     }
 
@@ -3602,7 +3710,7 @@
           userFollowingsSet = new Set(data.map(r => r.following_id));
         }
       } catch (e) {
-        console.warn('Follows fetch error:', e);
+        console.error("Failed during follows fetch:", e);
       }
     }
 
@@ -3611,11 +3719,14 @@
       if (!slot) return;
 
       if (currentUser && currentUserProfile) {
-        const avatarSrc = currentUserProfile.avatar_url || 'https://res.cloudinary.com/prjgzqvy/image/upload/v1786899509/image_1776070140355_zjbr8s.jpg';
+        const avatarSrc = currentUserProfile.avatar_url ? sanitizeUrl(currentUserProfile.avatar_url) : CLEAN_FALLBACK_SVG;
+        const isAdmin = isUserAdmin();
+
         slot.innerHTML = `
-          <button class="btn-auth-user" onclick="navigateTo('creator-profile', '${currentUserProfile.username}')" title="View your creator profile">
-            <img class="header-user-avatar" src="${avatarSrc}" alt="${currentUserProfile.display_name}">
-            <span>${currentUserProfile.display_name.split(' ')[0]}</span>
+          <button class="btn-auth-user" onclick="navigateTo('creator-profile', '${escapeHtml(currentUserProfile.username)}')" title="View your creator profile">
+            <img class="header-user-avatar" src="${avatarSrc}" alt="${escapeHtml(currentUserProfile.display_name)}" onerror="this.onerror=null;this.src=CLEAN_FALLBACK_SVG">
+            <span>${escapeHtml(currentUserProfile.display_name.split(' ')[0])}</span>
+            ${isAdmin ? '<span class="official-badge-pill">ADMIN</span>' : ''}
           </button>
         `;
       } else {
@@ -3716,6 +3827,7 @@
           closeAuthModal();
         }
       } catch (err) {
+        console.error("Failed during auth operation:", err);
         errorMsg.textContent = err.message || 'Authentication failed. Please check credentials.';
         errorMsg.style.display = 'block';
       } finally {
@@ -3780,7 +3892,7 @@
         if (currentView === 'detail' && currentSelectedId) renderDetail(currentSelectedId);
         if (currentView === 'creator-profile' && activeProfileUsername) renderCreatorProfileView(activeProfileUsername);
       } catch (err) {
-        console.error('Follow toggle error:', err);
+        console.error("Failed during follow toggle:", err);
         notifyToast('Unable to complete request');
       }
     }
@@ -3815,19 +3927,22 @@
       const followBtn = document.getElementById('cpFollowBtn');
       const grid = document.getElementById('cpBasesGrid');
       const empty = document.getElementById('cpEmptyBases');
+      const officialBadge = document.getElementById('cpOfficialBadge');
 
       grid.innerHTML = '';
       empty.style.display = 'none';
+      if (officialBadge) officialBadge.style.display = 'none';
 
       if (username === 'baseforge') {
         avatar.src = 'https://res.cloudinary.com/prjgzqvy/image/upload/v1786899509/image_1776070140355_zjbr8s.jpg';
         name.textContent = 'BaseForge Official';
+        if (officialBadge) officialBadge.style.display = 'inline-flex';
         handle.textContent = '@baseforge';
         bio.textContent = 'Curated tournament and war layouts engineered by the community.';
         flwCount.textContent = '—';
         flgCount.textContent = '—';
         
-        const officialBases = allLayouts.filter(b => !b.creatorId && b.status === 'published');
+        const officialBases = allLayouts.filter(b => (!b.creatorId || b.isOfficialCreator) && b.status === 'published');
         bscCount.textContent = officialBases.length;
         followBtn.style.display = 'none';
 
@@ -3881,8 +3996,11 @@
           return;
         }
 
-        avatar.src = profile.avatar_url || CLEAN_FALLBACK_SVG;
+        avatar.src = profile.avatar_url ? sanitizeUrl(profile.avatar_url) : CLEAN_FALLBACK_SVG;
         name.textContent = profile.display_name;
+        if (profile.role === 'admin' || profile.id === OFFICIAL_ADMIN_UUID) {
+          if (officialBadge) officialBadge.style.display = 'inline-flex';
+        }
         handle.textContent = `@${profile.username}`;
         bio.textContent = profile.bio || 'Clash base architect.';
         flwCount.textContent = followers;
@@ -3906,7 +4024,7 @@
           grid.innerHTML = creatorBases.map(b => createCardMarkup(b)).join('');
         }
       } catch (err) {
-        console.error('Creator profile load error:', err);
+        console.error("Failed during creator profile rendering:", err);
         notifyToast('Failed to load profile');
       }
     }
@@ -3958,36 +4076,53 @@
         base.type === 'Trophy' ? 'Trophy Push' : 'Balanced Defense';
 
       const tags = (base.tags && base.tags.length) ? base.tags : ["Clan War", "Strong Defense"];
-      document.getElementById('dTags').innerHTML = tags.map(t => `<span class="tag-badge">${t}</span>`).join('');
+      document.getElementById('dTags').innerHTML = tags.map(t => `<span class="tag-badge">${escapeHtml(t)}</span>`).join('');
 
       const heroFrame = document.getElementById('detailHeroContainer');
       heroFrame.onclick = (e) => {
-        openFullscreenPreview(base.image || CLEAN_FALLBACK_SVG, `${baseName} \u2022 TH${base.townHall}`, e);
+        openCardFullscreen(base.id, e);
       };
 
       syncDetailSaveState(getSavedList().includes(base.id));
 
+      // Owner / Admin Controls Bar
       const ownerBar = document.getElementById('dOwnerControls');
-      if (currentUser && base.creatorId === currentUser.id) {
+      const ownerLabel = document.getElementById('dOwnerControlsLabel');
+      const adminTogglePublishBtn = document.getElementById('dAdminTogglePublishBtn');
+      const isOwner = currentUser && (base.creatorId === currentUser.id);
+      const isAdmin = isUserAdmin();
+
+      if (isOwner || isAdmin) {
         ownerBar.style.display = 'flex';
+        ownerLabel.textContent = isAdmin && !isOwner ? '✦ Administrator Controls' : '✦ You created this base';
+        if (isAdmin) {
+          adminTogglePublishBtn.style.display = 'inline-block';
+          adminTogglePublishBtn.textContent = base.status === 'published' ? 'Unpublish' : 'Publish';
+        } else {
+          adminTogglePublishBtn.style.display = 'none';
+        }
       } else {
         ownerBar.style.display = 'none';
       }
 
+      // Creator Card Rendering
       const crAvatar = document.getElementById('baseCreatorAvatar');
       const crName = document.getElementById('baseCreatorName');
       const crHandle = document.getElementById('baseCreatorHandle');
       const crFollowers = document.getElementById('baseCreatorFollowers');
       const crFollowBtn = document.getElementById('baseCreatorFollowBtn');
+      const officialBadge = document.getElementById('baseCreatorOfficialBadge');
 
-      crAvatar.src = base.creatorAvatar || 'https://res.cloudinary.com/prjgzqvy/image/upload/v1786899509/image_1776070140355_zjbr8s.jpg';
-      crName.textContent = base.creatorName;
+      crAvatar.src = base.creatorAvatar || CLEAN_FALLBACK_SVG;
+      crName.querySelector('span:first-child').textContent = base.creatorName;
       crHandle.textContent = `@${base.creatorUsername}`;
 
-      if (!base.creatorId) {
+      if (base.isOfficialCreator) {
+        officialBadge.style.display = 'inline-flex';
         crFollowers.textContent = 'Official Base';
         crFollowBtn.style.display = 'none';
       } else {
+        officialBadge.style.display = 'none';
         crFollowBtn.style.display = 'inline-flex';
         const isFollowing = userFollowingsSet.has(base.creatorId);
         crFollowBtn.className = `btn-follow ${isFollowing ? 'following' : ''}`;
@@ -4009,6 +4144,7 @@
         }
       }
 
+      // Related Bases Rendering
       const seen = new Set([base.id]);
       const scoredOthers = [];
 
@@ -4036,6 +4172,27 @@
       }
     }
 
+    async function toggleBasePublishStatus(baseId) {
+      const base = allLayouts.find(b => b.id === baseId);
+      if (!base) return;
+
+      const nextStatus = base.status === 'published' ? 'draft' : 'published';
+      try {
+        const { error } = await supabaseClient
+          .from('bases')
+          .update({ status: nextStatus })
+          .eq('id', baseId);
+
+        if (error) throw error;
+        base.status = nextStatus;
+        notifyToast(`Base set to ${nextStatus}`);
+        renderDetail(baseId);
+      } catch (err) {
+        console.error("Base status toggle failed:", err);
+        notifyToast(err.message || 'Error updating base status');
+      }
+    }
+
     // --------------------------------------------------------------------------
     // 6. CREATE / EDIT / DELETE BASES
     // --------------------------------------------------------------------------
@@ -4059,7 +4216,10 @@
         return;
       }
 
-      const myBases = allLayouts.filter(b => b.creatorId === currentUser.id);
+      const isAdmin = isUserAdmin();
+      const myBases = isAdmin 
+        ? allLayouts 
+        : allLayouts.filter(b => b.creatorId === currentUser.id);
 
       if (myBases.length === 0) {
         userBasesContainer.innerHTML = `<p style="font-size: 0.84rem; color: var(--text-muted);">You have not created any bases yet.</p>`;
@@ -4068,12 +4228,13 @@
 
       userBasesContainer.innerHTML = myBases.map(b => `
         <div class="sub-item-card">
-          <img class="sub-item-thumb" src="${b.image || CLEAN_FALLBACK_SVG}" alt="${b.name}" onerror="this.src=CLEAN_FALLBACK_SVG">
+          <img class="sub-item-thumb" src="${b.image || CLEAN_FALLBACK_SVG}" alt="${escapeHtml(b.name)}" onerror="this.onerror=null;this.src=CLEAN_FALLBACK_SVG">
           <div class="sub-item-info">
-            <div class="sub-item-title">${b.name}</div>
+            <div class="sub-item-title">${escapeHtml(b.name)}</div>
             <div class="sub-item-meta">
               <span class="status-badge-chip ${b.status === 'published' ? 'status-published' : 'status-draft'}">${b.status}</span>
               <span>TH${b.townHall} &bull; ${b.type}</span>
+              ${isAdmin && b.creatorId !== currentUser.id ? '<span>&bull; Other User Base</span>' : ''}
             </div>
           </div>
           <button class="btn-sub-action" onclick="openEditBase('${b.id}')" title="Edit base">
@@ -4095,8 +4256,9 @@
       const base = allLayouts.find(b => b.id === baseId);
       if (!base) return;
 
-      if (!currentUser || base.creatorId !== currentUser.id) {
-        notifyToast('You cannot edit bases you do not own');
+      const isAdmin = isUserAdmin();
+      if (!currentUser || (!isAdmin && base.creatorId !== currentUser.id)) {
+        notifyToast('You do not have permission to edit this base');
         return;
       }
 
@@ -4132,8 +4294,9 @@
       const base = allLayouts.find(b => b.id === baseId);
       if (!base) return;
 
-      if (!currentUser || base.creatorId !== currentUser.id) {
-        notifyToast('You can only delete bases you own');
+      const isAdmin = isUserAdmin();
+      if (!currentUser || (!isAdmin && base.creatorId !== currentUser.id)) {
+        notifyToast('You do not have permission to delete this base');
         return;
       }
 
@@ -4142,20 +4305,20 @@
       }
 
       try {
-        const { error } = await supabaseClient
-          .from('bases')
-          .delete()
-          .eq('id', baseId)
-          .eq('creator_id', currentUser.id);
+        let query = supabaseClient.from('bases').delete().eq('id', baseId);
+        if (!isAdmin) {
+          query = query.eq('creator_id', currentUser.id);
+        }
 
+        const { error } = await query;
         if (error) throw error;
 
         notifyToast('Base deleted successfully');
         await loadBasesFromSupabase();
         if (currentView === 'detail') navigateTo('explore');
       } catch (err) {
-        console.error('Delete error:', err);
-        notifyToast('Failed to delete base');
+        console.error("Failed during base deletion:", err);
+        notifyToast(err.message || 'Failed to delete base');
       }
     }
 
@@ -4173,8 +4336,8 @@
       const townHall = Number(document.getElementById('subTH').value);
       const type = document.getElementById('subPurpose').value;
       const description = document.getElementById('subDesc').value.trim();
-      const baseLink = document.getElementById('subLink').value.trim();
-      const image = document.getElementById('subImg').value.trim();
+      const baseLink = sanitizeUrl(document.getElementById('subLink').value);
+      const image = sanitizeUrl(document.getElementById('subImg').value);
       const status = document.getElementById('subStatus').value;
       
       let isValid = true;
@@ -4211,8 +4374,10 @@
       submitBtn.disabled = true;
 
       try {
+        const isAdmin = isUserAdmin();
+
         if (editId) {
-          const { error } = await supabaseClient
+          let query = supabaseClient
             .from('bases')
             .update({
               name,
@@ -4224,10 +4389,15 @@
               base_link: baseLink,
               status
             })
-            .eq('id', editId)
-            .eq('creator_id', currentUser.id);
+            .eq('id', editId);
 
+          if (!isAdmin) {
+            query = query.eq('creator_id', currentUser.id);
+          }
+
+          const { error } = await query;
           if (error) throw error;
+
           notifyToast('Base updated successfully');
           cancelBaseEdit();
         } else {
@@ -4256,7 +4426,7 @@
         await loadBasesFromSupabase();
         renderSubmitView();
       } catch (err) {
-        console.error('Submission error:', err);
+        console.error("Failed during base submission:", err);
         notifyToast(err.message || 'Failed to save base');
       } finally {
         submitBtn.disabled = false;
@@ -4264,32 +4434,69 @@
     }
 
     // --------------------------------------------------------------------------
-    // 7. PROFILE SETTINGS UPDATE
+    // 7. PROFILE PREVIEW & SETTINGS UPDATE
     // --------------------------------------------------------------------------
+    function handleAvatarInputPreview(url) {
+      const previewImg = document.getElementById('settingsAvatarPreview');
+      if (!previewImg) return;
+      const cleaned = sanitizeUrl(url);
+      if (cleaned && /^https?:\/\//i.test(cleaned)) {
+        previewImg.src = cleaned;
+      } else {
+        previewImg.src = CLEAN_FALLBACK_SVG;
+      }
+    }
+
+    function handleProfileFieldPreview() {
+      const nameVal = document.getElementById('setDisplayName').value.trim();
+      const userVal = document.getElementById('setUsername').value.trim();
+      const prevName = document.getElementById('settingsPreviewName');
+      const prevUser = document.getElementById('settingsPreviewHandle');
+      if (prevName) prevName.textContent = nameVal || 'Display Name';
+      if (prevUser) prevUser.textContent = userVal ? `@${userVal}` : '@username';
+    }
+
     async function saveProfileChanges() {
       if (!currentUser || !supabaseClient) return;
 
       const displayName = document.getElementById('setDisplayName').value.trim();
       const username = document.getElementById('setUsername').value.trim().toLowerCase();
-      const avatarUrl = document.getElementById('setAvatarUrl').value.trim();
+      const rawAvatarUrl = document.getElementById('setAvatarUrl').value;
+      const avatarUrl = sanitizeUrl(rawAvatarUrl);
       const bio = document.getElementById('setBio').value.trim();
 
+      if (!username || username.length < 3) {
+        notifyToast('Username must be at least 3 characters');
+        return;
+      }
+
       try {
+        const updatePayload = {
+          display_name: displayName || username,
+          username: username,
+          avatar_url: avatarUrl,
+          bio: bio
+        };
+
         const { error } = await supabaseClient
           .from('profiles')
-          .update({
-            display_name: displayName,
-            username,
-            avatar_url: avatarUrl,
-            bio
-          })
+          .update(updatePayload)
           .eq('id', currentUser.id);
 
         if (error) throw error;
-        await fetchCurrentUserProfile();
+
+        currentUserProfile = {
+          ...currentUserProfile,
+          ...updatePayload
+        };
+
+        handleAvatarInputPreview(avatarUrl);
         renderAuthHeaderState();
-        notifyToast('Profile updated');
+        notifyToast('Profile updated successfully');
+
+        await loadBasesFromSupabase();
       } catch (err) {
+        console.error("Failed during profile update:", err);
         notifyToast(err.message || 'Error updating profile');
       }
     }
@@ -4299,17 +4506,16 @@
     // --------------------------------------------------------------------------
     function createCardMarkup(item, isEager = false) {
       const isSaved = getSavedList().includes(item.id);
-      const safeTitle = (item.name || "Clash Base").replace(/'/g, "\\'");
       const baseType = (item.type || "War").toUpperCase();
 
       const tags = item.tags || [];
       let tagsMarkup = '';
       if (tags.length <= 3) {
-        tagsMarkup = tags.map(t => `<span class="tag-badge">${t}</span>`).join('');
+        tagsMarkup = tags.map(t => `<span class="tag-badge">${escapeHtml(t)}</span>`).join('');
       } else {
         const visible = tags.slice(0, 3);
         const remaining = tags.length - 3;
-        tagsMarkup = visible.map(t => `<span class="tag-badge">${t}</span>`).join('') +
+        tagsMarkup = visible.map(t => `<span class="tag-badge">${escapeHtml(t)}</span>`).join('') +
                      `<span class="tag-badge tag-badge-more">+${remaining} more</span>`;
       }
 
@@ -4317,10 +4523,10 @@
         <div class="base-card" data-id="${item.id}">
           <div 
             class="card-figure" 
-            onclick="openFullscreenPreview('${item.image || CLEAN_FALLBACK_SVG}', '${safeTitle} &bull; TH${item.townHall}', event)"
+            onclick="openCardFullscreen('${item.id}', event)"
             title="Click to expand fullscreen"
           >
-            <img class="card-image" src="${item.image || CLEAN_FALLBACK_SVG}" alt="${item.name} layout preview" ${isEager ? '' : 'loading="lazy"'} onerror="this.onerror=null;this.src='${CLEAN_FALLBACK_SVG}'">
+            <img class="card-image" src="${item.image || CLEAN_FALLBACK_SVG}" alt="${escapeHtml(item.name)} layout preview" ${isEager ? '' : 'loading="lazy"'} onerror="this.onerror=null;this.src=CLEAN_FALLBACK_SVG">
             <span class="card-meta-pill">TH${item.townHall} &bull; ${baseType}</span>
             ${item.status === 'draft' ? '<span class="card-status-pill">DRAFT</span>' : ''}
             
@@ -4351,10 +4557,10 @@
           <div class="card-content" onclick="navigateTo('detail', '${item.id}')">
             <div class="card-meta-line">
               <span class="type-badge">${baseType}</span>
-              <span class="card-author-text">${item.creatorName}</span>
+              <span class="card-author-text">${escapeHtml(item.creatorName)}</span>
             </div>
-            <h3 class="card-title" title="${item.name}">${item.name}</h3>
-            <p class="card-short-desc">${item.description || 'Defensive base layout.'}</p>
+            <h3 class="card-title" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</h3>
+            <p class="card-short-desc">${escapeHtml(item.description || 'Defensive base layout.')}</p>
             <div class="card-tags">${tagsMarkup}</div>
             <button 
               class="btn-card-copy" 
@@ -4370,6 +4576,23 @@
           </div>
         </div>
       `;
+    }
+
+    function openCardFullscreen(baseId, e) {
+      if (e) e.stopPropagation();
+      const base = allLayouts.find(b => b.id === baseId);
+      if (!base) return;
+      openFullscreenPreview(base.image || CLEAN_FALLBACK_SVG, `${base.name} \u2022 TH${base.townHall}`, e);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
 
     // --------------------------------------------------------------------------
@@ -4618,8 +4841,9 @@
         navigator.share(shareData).catch(() => {});
       } else {
         copyToClipboard(window.location.href, () => {
-          notifyToast('Link copied');
-        }, () => {
+          notifyToast('Link copied to clipboard');
+        }, (err) => {
+          console.error("Share copy failed:", err);
           notifyToast('Unable to share link');
         });
       }
@@ -4884,12 +5108,20 @@
         : 0;
 
       const profilePanel = document.getElementById('settingsProfilePanel');
+      const adminBadge = document.getElementById('settingsAdminBadge');
+
       if (currentUser && currentUserProfile) {
         profilePanel.style.display = 'block';
+        if (adminBadge) {
+          adminBadge.style.display = isUserAdmin() ? 'inline-flex' : 'none';
+        }
         document.getElementById('setDisplayName').value = currentUserProfile.display_name || '';
         document.getElementById('setUsername').value = currentUserProfile.username || '';
         document.getElementById('setAvatarUrl').value = currentUserProfile.avatar_url || '';
         document.getElementById('setBio').value = currentUserProfile.bio || '';
+
+        handleAvatarInputPreview(currentUserProfile.avatar_url || '');
+        handleProfileFieldPreview();
       } else {
         profilePanel.style.display = 'none';
       }
@@ -4915,7 +5147,7 @@
 
     function exportAppData() {
       const data = {
-        version: "2.1.0",
+        version: "2.2.0",
         exportDate: new Date().toISOString(),
         saved: getSavedList(),
         recent: getRecentlyViewedIds(),
@@ -5047,4 +5279,4 @@
     });
   </script>
 </body>
-</html>
+  </html>

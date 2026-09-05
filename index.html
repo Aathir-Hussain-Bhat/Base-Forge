@@ -235,12 +235,11 @@
       gap: 8px;
     }
 
-    /* PWA Install Button (Header) */
     .btn-pwa-install {
       height: 36px;
       padding: 0 12px;
       border-radius: var(--radius-pill);
-      display: none; /* Dynamic: visible only when installable & not installed */
+      display: none;
       align-items: center;
       gap: 6px;
       font-size: 0.8rem;
@@ -329,8 +328,12 @@
     .header-user-avatar {
       width: 22px;
       height: 22px;
+      min-width: 22px;
+      min-height: 22px;
+      aspect-ratio: 1 / 1;
       border-radius: 50%;
       object-fit: cover;
+      display: block;
       background: var(--accent-soft);
     }
 
@@ -374,7 +377,6 @@
       display: none !important;
     }
 
-    /* Offline Banner (Subtle, non-intrusive) */
     .offline-banner {
       display: none;
       background: var(--bg-subtle);
@@ -1292,8 +1294,12 @@
     .base-creator-avatar {
       width: 48px;
       height: 48px;
+      min-width: 48px;
+      min-height: 48px;
+      aspect-ratio: 1 / 1;
       border-radius: 50%;
       object-fit: cover;
+      display: block;
       background: var(--accent-soft);
       flex-shrink: 0;
     }
@@ -1418,8 +1424,12 @@
     .profile-avatar-large {
       width: 96px;
       height: 96px;
+      min-width: 96px;
+      min-height: 96px;
+      aspect-ratio: 1 / 1;
       border-radius: 50%;
       object-fit: cover;
+      display: block;
       border: 3px solid var(--surface);
       box-shadow: var(--shadow-hover);
       margin-bottom: 14px;
@@ -1494,8 +1504,12 @@
     .avatar-preview-img {
       width: 60px;
       height: 60px;
+      min-width: 60px;
+      min-height: 60px;
+      aspect-ratio: 1 / 1;
       border-radius: 50%;
       object-fit: cover;
+      display: block;
       background: var(--surface);
       border: 2px solid var(--border-strong);
       flex-shrink: 0;
@@ -2955,7 +2969,7 @@
         <!-- CREATOR SECTION -->
         <div class="base-creator-card" id="baseCreatorCard">
           <div class="base-creator-info" onclick="handleCreatorCardClick()">
-            <img class="base-creator-avatar" id="baseCreatorAvatar" src="" alt="Creator avatar" onerror="this.onerror=null;this.src=CLEAN_FALLBACK_SVG">
+            <img class="base-creator-avatar" id="baseCreatorAvatar" src="" alt="Creator avatar" onerror="this.onerror=null;this.src=getAvatarFallback('BaseForge');">
             <div>
               <div class="base-creator-name" id="baseCreatorName">
                 <span>BaseForge Official</span>
@@ -3020,7 +3034,7 @@
         </button>
 
         <div class="profile-hero">
-          <img class="profile-avatar-large" id="cpAvatar" src="" alt="Profile Avatar" onerror="this.onerror=null;this.src=CLEAN_FALLBACK_SVG">
+          <img class="profile-avatar-large" id="cpAvatar" src="" alt="Profile Avatar" onerror="this.onerror=null;this.src=getAvatarFallback('User');">
           <h1 class="profile-display-name">
             <span id="cpDisplayName">Creator Name</span>
             <span class="official-badge-pill" id="cpOfficialBadge" style="display: none;">OFFICIAL</span>
@@ -3223,7 +3237,7 @@
         <h1 class="page-title">Settings</h1>
         <p class="page-quote">“Configure visual preferences, account settings, and application options.”</p>
 
-        <!-- PWA Install Banner Card (Hidden if installed or unsupported) -->
+        <!-- PWA Install Banner Card -->
         <div class="pwa-card-panel" id="pwaSettingsCard" style="display: none;">
           <div class="pwa-card-info">
             <img class="pwa-card-icon" src="https://res.cloudinary.com/prjgzqvy/image/upload/c_fill,w_192,h_192/v1788604860/grok_1788604728310_kefg92.jpg" alt="Base Forge icon">
@@ -3244,7 +3258,7 @@
 
           <!-- Avatar Preview Box & Actions -->
           <div class="avatar-preview-box">
-            <img class="avatar-preview-img" id="settingsAvatarPreview" src="" alt="Avatar preview" onerror="this.onerror=null;this.src=CLEAN_FALLBACK_SVG">
+            <img class="avatar-preview-img" id="settingsAvatarPreview" src="" alt="Avatar preview" onerror="this.onerror=null;this.src=getAvatarFallback('User');">
             <div>
               <div style="font-size: 0.92rem; font-weight: 700;" id="settingsPreviewName">Display Name</div>
               <div class="avatar-preview-text" id="settingsPreviewHandle">@username</div>
@@ -3456,7 +3470,7 @@
 
         <a href="https://www.instagram.com/bhat_boyka/" target="_blank" rel="noopener noreferrer" class="creator-link-card">
           <div class="creator-link-left">
-            <svg class="creator-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="creator-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
               <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
               <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
@@ -3546,8 +3560,7 @@
 
   <!-- ==========================================================================
        FULLSCREEN BASE PREVIEW OVERLAY
-       ========================================================================== */
-  -->
+       ========================================================================== -->
   <div 
     id="fullscreenOverlay" 
     class="fullscreen-overlay" 
@@ -3655,6 +3668,18 @@
     }
 
     const CLEAN_FALLBACK_SVG = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="100%" height="100%" fill="%23242A24"/><path d="M0 40h600M0 80h600M0 120h600M0 160h600M0 200h600M0 240h600M0 280h600M0 320h600M0 360h600M40 0v400M80 0v400M120 0v400M160 0v400M200 0v400M240 0v400M280 0v400M320 0v400M360 0v400M400 0v400M440 0v400M480 0v400M520 0v400M560 0v400" stroke="%232D352D" stroke-width="1"/><rect x="210" y="140" width="180" height="120" rx="8" fill="%233E5437" stroke="%2378996F" stroke-width="2"/><circle cx="300" cy="200" r="28" fill="none" stroke="%23E8EFE6" stroke-width="2" stroke-dasharray="4 4"/><text x="300" y="205" fill="%23FFFFFF" font-family="sans-serif" font-size="12" font-weight="700" letter-spacing="2" text-anchor="middle">BASE PREVIEW</text></svg>';
+
+    // Universal clean SVG avatar fallback with initial
+    function getAvatarFallback(displayName = 'User') {
+      const cleanName = String(displayName || 'User').trim();
+      const initial = (cleanName.charAt(0) || 'U').toUpperCase();
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+          <rect width="100%" height="100%" fill="#3E5437"/>
+          <text x="50%" y="55%" font-family="Plus Jakarta Sans, -apple-system, sans-serif" font-size="44" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">${initial}</text>
+        </svg>
+      `);
+    }
 
     let currentUser = null;
     let currentUserProfile = null;
@@ -4040,6 +4065,9 @@
         supabaseBases = (data || []).map(row => {
           const profile = row.profiles || null;
           const isOfficial = (!row.creator_id) || (profile && profile.role === 'admin') || (row.creator_id === OFFICIAL_ADMIN_UUID);
+          const rawFeatured = row.featured;
+          const isFeaturedBool = rawFeatured === true || rawFeatured === 'true' || rawFeatured === 1 || rawFeatured === 't';
+          const normalizedStatus = String(row.status || 'published').toLowerCase();
 
           return {
             id: String(row.id),
@@ -4052,12 +4080,12 @@
             tags: Array.isArray(row.tags) ? row.tags : [],
             image: sanitizeUrl(row.image),
             baseLink: sanitizeUrl(row.base_link),
-            featured: Boolean(row.featured),
-            status: row.status || 'published',
+            featured: isFeaturedBool,
+            status: normalizedStatus,
             creatorId: row.creator_id || null,
             creatorName: profile ? profile.display_name : (isOfficial ? 'BaseForge Official' : 'Anonymous Builder'),
             creatorUsername: profile ? profile.username : (isOfficial ? 'baseforge' : 'builder'),
-            creatorAvatar: profile && profile.avatar_url ? sanitizeUrl(profile.avatar_url) : 'https://res.cloudinary.com/prjgzqvy/image/upload/v1786899509/image_1776070140355_zjbr8s.jpg',
+            creatorAvatar: profile && profile.avatar_url && profile.avatar_url.trim() !== '' ? sanitizeUrl(profile.avatar_url) : '',
             isOfficialCreator: isOfficial,
             createdAt: row.created_at ? row.created_at.split('T')[0] : ''
           };
@@ -4241,13 +4269,16 @@
       if (!slot) return;
 
       if (currentUser && currentUserProfile) {
-        const avatarSrc = currentUserProfile.avatar_url ? sanitizeUrl(currentUserProfile.avatar_url) : CLEAN_FALLBACK_SVG;
+        const displayName = currentUserProfile.display_name || currentUserProfile.username || 'User';
+        const avatarSrc = currentUserProfile.avatar_url && currentUserProfile.avatar_url.trim() !== '' 
+          ? sanitizeUrl(currentUserProfile.avatar_url) 
+          : getAvatarFallback(displayName);
         const isAdmin = isUserAdmin();
 
         slot.innerHTML = `
           <button class="btn-auth-user" onclick="navigateTo('creator-profile', '${escapeHtml(currentUserProfile.username)}')" title="View your creator profile">
-            <img class="header-user-avatar" src="${avatarSrc}" alt="${escapeHtml(currentUserProfile.display_name)}" onerror="this.onerror=null;this.src=CLEAN_FALLBACK_SVG">
-            <span>${escapeHtml(currentUserProfile.display_name.split(' ')[0])}</span>
+            <img class="header-user-avatar" src="${avatarSrc}" alt="${escapeHtml(displayName)}" onerror="this.onerror=null;this.src=getAvatarFallback('${escapeHtml(displayName)}');">
+            <span>${escapeHtml(displayName.split(' ')[0])}</span>
             ${isAdmin ? '<span class="official-badge-pill">ADMIN</span>' : ''}
           </button>
         `;
@@ -4518,8 +4549,13 @@
           return;
         }
 
-        avatar.src = profile.avatar_url ? sanitizeUrl(profile.avatar_url) : CLEAN_FALLBACK_SVG;
-        name.textContent = profile.display_name;
+        const profileDisplayName = profile.display_name || profile.username || 'User';
+        avatar.src = profile.avatar_url && profile.avatar_url.trim() !== '' 
+          ? sanitizeUrl(profile.avatar_url) 
+          : getAvatarFallback(profileDisplayName);
+        avatar.onerror = () => { avatar.onerror = null; avatar.src = getAvatarFallback(profileDisplayName); };
+
+        name.textContent = profileDisplayName;
         if (profile.role === 'admin' || profile.id === OFFICIAL_ADMIN_UUID) {
           if (officialBadge) officialBadge.style.display = 'inline-flex';
         }
@@ -4648,9 +4684,14 @@
       const crFollowBtn = document.getElementById('baseCreatorFollowBtn');
       const officialBadge = document.getElementById('baseCreatorOfficialBadge');
 
-      crAvatar.src = base.creatorAvatar || CLEAN_FALLBACK_SVG;
-      crName.querySelector('span:first-child').textContent = base.creatorName;
-      crHandle.textContent = `@${base.creatorUsername}`;
+      const creatorDisplayName = base.creatorName || 'BaseForge Official';
+      crAvatar.src = base.creatorAvatar && base.creatorAvatar.trim() !== '' 
+        ? sanitizeUrl(base.creatorAvatar) 
+        : getAvatarFallback(creatorDisplayName);
+      crAvatar.onerror = () => { crAvatar.onerror = null; crAvatar.src = getAvatarFallback(creatorDisplayName); };
+
+      crName.querySelector('span:first-child').textContent = creatorDisplayName;
+      crHandle.textContent = `@${base.creatorUsername || 'baseforge'}`;
 
       if (base.isOfficialCreator) {
         officialBadge.style.display = 'inline-flex';
@@ -5020,10 +5061,12 @@
       const previewImg = document.getElementById('settingsAvatarPreview');
       if (!previewImg) return;
       const cleaned = sanitizeUrl(url);
+      const fallback = getAvatarFallback(document.getElementById('setDisplayName')?.value || 'User');
       if (cleaned && /^https?:\/\//i.test(cleaned)) {
         previewImg.src = cleaned;
+        previewImg.onerror = () => { previewImg.onerror = null; previewImg.src = fallback; };
       } else {
-        previewImg.src = CLEAN_FALLBACK_SVG;
+        previewImg.src = fallback;
       }
     }
 
@@ -5034,6 +5077,12 @@
       const prevUser = document.getElementById('settingsPreviewHandle');
       if (prevName) prevName.textContent = nameVal || 'Display Name';
       if (prevUser) prevUser.textContent = userVal ? `@${userVal}` : '@username';
+
+      const avatarInput = document.getElementById('setAvatarUrl');
+      if (!avatarInput || !avatarInput.value.trim()) {
+        const previewImg = document.getElementById('settingsAvatarPreview');
+        if (previewImg) previewImg.src = getAvatarFallback(nameVal || userVal || 'User');
+      }
     }
 
     async function saveProfileChanges() {
@@ -5106,7 +5155,7 @@
             onclick="openCardFullscreen('${item.id}', event)"
             title="Click to expand fullscreen"
           >
-            <img class="card-image" src="${item.image || CLEAN_FALLBACK_SVG}" alt="${escapeHtml(item.name)} layout preview" ${isEager ? '' : 'loading="lazy"'} onerror="this.onerror=null;this.src=CLEAN_FALLBACK_SVG">
+            <img class="card-image" src="${item.image || CLEAN_FALLBACK_SVG}" alt="${escapeHtml(item.name)} layout preview" ${isEager ? '' : 'loading="lazy"'} onerror="this.onerror=null;this.src='${CLEAN_FALLBACK_SVG}'">
             <span class="card-meta-pill">TH${item.townHall} &bull; ${baseType}</span>
             ${item.status === 'draft' ? '<span class="card-status-pill">DRAFT</span>' : ''}
             
@@ -5190,13 +5239,19 @@
       const seen = new Set();
       const featured = [];
       allLayouts.forEach(b => {
-        if (b.featured && b.status === 'published' && !seen.has(b.id)) {
+        const isPublished = !b.status || b.status === 'published';
+        const isFeatured = b.featured === true || b.featured === 'true' || b.featured === 1 || b.featured === 't';
+        if (isFeatured && isPublished && !seen.has(b.id)) {
           seen.add(b.id);
           featured.push(b);
         }
       });
 
       const list = featured.slice(0, 3);
+      if (list.length === 0) {
+        container.innerHTML = `<p style="grid-column: 1 / -1; font-size: 0.88rem; color: var(--text-muted); text-align: center; padding: 24px 0;">No featured bases available at this time.</p>`;
+        return;
+      }
       container.innerHTML = list.map(item => createCardMarkup(item, true)).join('');
     }
 
@@ -5862,14 +5917,12 @@
         return;
       }
 
-      // Check for iOS Safari
       const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
 
       if (deferredPrompt) {
         if (headerBtn) headerBtn.style.display = 'inline-flex';
         if (settingsCard) settingsCard.style.display = 'flex';
       } else if (isIos) {
-        // Provide install guidance on iOS devices if not yet in standalone mode
         if (settingsCard) settingsCard.style.display = 'flex';
         if (headerBtn) headerBtn.style.display = 'none';
       } else {
@@ -5901,7 +5954,8 @@
       if (modal) modal.classList.add('open');
     }
 
-    function closeIosInstallModal() {
+    function closeIosInstallModal(e = null) {
+      if (e && e.target !== document.getElementById('iosInstallModal')) return;
       const modal = document.getElementById('iosInstallModal');
       if (modal) modal.classList.remove('open');
     }
@@ -5918,7 +5972,6 @@
       updatePwaUiState();
     });
 
-    // Connection listener
     window.addEventListener('online', () => {
       const banner = document.getElementById('offlineBanner');
       if (banner) banner.classList.remove('active');
@@ -5989,7 +6042,6 @@
         navigateTo('creator-profile', pendingCreatorUsername);
       }
 
-      // Register PWA service worker smoothly in background
       registerServiceWorker();
       updatePwaUiState();
     });

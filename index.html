@@ -1,0 +1,5050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BASEFORGE — Find. Copy. Defend.</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* ==========================================================================
+       1. DESIGN TOKENS & RESET
+       ========================================================================== */
+    :root {
+      --bg: #F8F6F2;
+      --bg-subtle: #EFECE6;
+      --surface: #FFFFFF;
+      --border: rgba(28, 33, 26, 0.07);
+      --border-strong: rgba(28, 33, 26, 0.14);
+
+      --text-main: #191C18;
+      --text-muted: #676F64;
+      --text-subtle: #9EA69B;
+
+      --accent: #3E5437;
+      --accent-hover: #32442C;
+      --accent-soft: #E8EFE6;
+      --accent-on-soft: #2D3E27;
+
+      --danger: #B44638;
+      --danger-soft: #FDF0EE;
+
+      --shadow-soft: 0 4px 20px -2px rgba(22, 28, 20, 0.04);
+      --shadow-hover: 0 12px 32px -4px rgba(22, 28, 20, 0.08);
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-pill: 9999px;
+
+      --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      --duration: 200ms;
+    }
+
+    [data-theme="dark"] {
+      --bg: #141613;
+      --bg-subtle: #1C201B;
+      --surface: #1E231D;
+      --border: rgba(255, 255, 255, 0.07);
+      --border-strong: rgba(255, 255, 255, 0.16);
+
+      --text-main: #F4F6F2;
+      --text-muted: #9BA498;
+      --text-subtle: #636D60;
+
+      --accent: #78996F;
+      --accent-hover: #8AB07F;
+      --accent-soft: #20291D;
+      --accent-on-soft: #D7E6D3;
+
+      --danger: #D9695C;
+      --danger-soft: #2D1E1C;
+
+      --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+      --shadow-hover: 0 12px 32px -4px rgba(0, 0, 0, 0.55);
+    }
+
+    [data-reduce-motion="true"] *,
+    [data-reduce-motion="true"] *::before,
+    [data-reduce-motion="true"] *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font);
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.55;
+      display: flex;
+      flex-direction: column;
+      transition: background-color var(--duration) var(--ease), color var(--duration) var(--ease);
+      overflow-x: hidden;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      background: none;
+      outline: none;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    input, textarea, select {
+      font-family: inherit;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 28px;
+    }
+
+    /* ==========================================================================
+       2. HEADER & CONTROLS
+       ========================================================================== */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(248, 246, 242, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      transition: background-color var(--duration) var(--ease);
+    }
+
+    [data-theme="dark"] .header {
+      background: rgba(20, 22, 19, 0.9);
+    }
+
+    .header-inner {
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      color: var(--text-main);
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .brand-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-link {
+      padding: 7px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: all var(--duration) var(--ease);
+    }
+
+    .nav-link:hover {
+      color: var(--text-main);
+      background: var(--bg-subtle);
+    }
+
+    .nav-link.active {
+      color: var(--text-main);
+      font-weight: 600;
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-creator-trigger {
+      height: 36px;
+      padding: 0 13px;
+      border-radius: var(--radius-pill);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      transition: all var(--duration) var(--ease);
+      user-select: none;
+    }
+
+    .btn-creator-trigger:hover {
+      color: var(--text-main);
+      border-color: var(--border-strong);
+      background: var(--bg-subtle);
+    }
+
+    .creator-sparkle-glyph {
+      font-size: 0.72rem;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .btn-auth-trigger {
+      height: 36px;
+      padding: 0 14px;
+      border-radius: var(--radius-pill);
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      transition: all var(--duration) var(--ease);
+    }
+
+    .btn-auth-trigger:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-subtle);
+    }
+
+    .btn-auth-user {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 36px;
+      padding: 0 12px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-main);
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all var(--duration) var(--ease);
+    }
+
+    .btn-auth-user:hover {
+      background: var(--bg-subtle);
+      border-color: var(--border-strong);
+    }
+
+    .header-user-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--accent-soft);
+    }
+
+    .btn-icon-subtle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      transition: all var(--duration) var(--ease);
+    }
+
+    .btn-icon-subtle:hover {
+      color: var(--text-main);
+      background: var(--surface);
+      border-color: var(--border);
+    }
+
+    .desktop-only {
+      display: flex !important;
+    }
+
+    .bottom-nav-bar {
+      display: none !important;
+    }
+
+    /* ==========================================================================
+       3. VIEW CONTAINER
+       ========================================================================== */
+    main {
+      flex: 1;
+      padding-bottom: 72px;
+    }
+
+    .view {
+      display: none;
+      animation: viewEnter var(--duration) var(--ease) forwards;
+    }
+
+    .view.active-view {
+      display: block;
+    }
+
+    @keyframes viewEnter {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==========================================================================
+       4. HERO SECTION (HOME)
+       ========================================================================== */
+    .hero {
+      padding: 76px 0 54px;
+      text-align: center;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+    }
+
+    .hero-heading {
+      font-size: clamp(2.6rem, 5.8vw, 4.2rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1.08;
+      color: var(--text-main);
+      margin-bottom: 34px;
+    }
+
+    .hero-search-wrapper {
+      max-width: 520px;
+      margin: 0 auto 24px;
+      position: relative;
+    }
+
+    .hero-search-input {
+      width: 100%;
+      height: 54px;
+      padding: 0 48px 0 50px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text-main);
+      font-size: 0.94rem;
+      box-shadow: var(--shadow-soft);
+      outline: none;
+      transition: border var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
+    }
+
+    .hero-search-input:focus {
+      border-color: var(--text-main);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .hero-search-input::placeholder {
+      color: var(--text-subtle);
+    }
+
+    .hero-search-icon {
+      position: absolute;
+      left: 19px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-subtle);
+      pointer-events: none;
+    }
+
+    .th-pill-list {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .th-chip {
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      border-radius: var(--radius-pill);
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      transition: all var(--duration) var(--ease);
+    }
+
+    .th-chip:hover {
+      color: var(--text-main);
+      border-color: var(--text-muted);
+      background: var(--surface);
+    }
+
+    .th-chip.active {
+      color: var(--text-main);
+      font-weight: 600;
+      background: var(--surface);
+      border-color: var(--text-main);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin: 52px 0 24px;
+    }
+
+    .section-heading {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .section-action {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--accent);
+      transition: opacity var(--duration) var(--ease);
+    }
+
+    .section-action:hover {
+      opacity: 0.8;
+    }
+
+    /* ==========================================================================
+       5. BASE CARDS & SKELETONS
+       ========================================================================== */
+    .base-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 26px;
+    }
+
+    [data-view-mode="compact"] .base-grid {
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    [data-view-mode="compact"] .card-figure {
+      aspect-ratio: 16 / 9;
+    }
+
+    [data-view-mode="compact"] .card-content {
+      padding: 12px 14px 14px;
+    }
+
+    [data-view-mode="compact"] .card-title {
+      font-size: 0.94rem;
+    }
+
+    .base-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease), border-color var(--duration) var(--ease);
+    }
+
+    .base-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+      border-color: var(--border-strong);
+    }
+
+    .card-figure {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 11;
+      background: var(--bg-subtle);
+      overflow: hidden;
+      cursor: zoom-in;
+    }
+
+    .card-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 220ms var(--ease), filter 220ms var(--ease);
+    }
+
+    .card-figure:hover .card-image {
+      transform: scale(1.03);
+      filter: brightness(0.92);
+    }
+
+    .expand-cue {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      background: rgba(18, 22, 18, 0.22);
+      transition: opacity 180ms var(--ease);
+      pointer-events: none;
+    }
+
+    .expand-cue-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 13px;
+      border-radius: var(--radius-pill);
+      background: rgba(20, 24, 20, 0.76);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #FFFFFF;
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      transform: translateY(4px);
+      transition: transform 180ms var(--ease);
+    }
+
+    .card-figure:hover .expand-cue {
+      opacity: 1;
+    }
+
+    .card-figure:hover .expand-cue-pill {
+      transform: translateY(0);
+    }
+
+    .card-meta-pill {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(18, 20, 18, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #FFFFFF;
+      z-index: 2;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    .card-status-pill {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      background: rgba(18, 20, 18, 0.85);
+      color: #FFFFFF;
+      z-index: 2;
+      text-transform: uppercase;
+    }
+
+    .card-save-icon {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(18, 20, 18, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform var(--duration) var(--ease), background-color var(--duration) var(--ease);
+      z-index: 3;
+    }
+
+    .card-save-icon:hover {
+      transform: scale(1.08);
+      background: rgba(18, 20, 18, 0.88);
+    }
+
+    .card-save-icon.saved {
+      color: #E2483D;
+      background: #FFFFFF;
+    }
+
+    .card-content {
+      padding: 16px 18px 18px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .card-meta-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .type-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .card-author-text {
+      font-size: 0.74rem;
+      color: var(--text-subtle);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-title {
+      font-size: 1.02rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      color: var(--text-main);
+      line-height: 1.35;
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      min-height: 2.7em;
+    }
+
+    .card-short-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      min-height: 2.9em;
+    }
+
+    .card-tags {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 16px;
+      margin-top: auto;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .tag-badge {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--bg-subtle);
+      white-space: nowrap;
+    }
+
+    .tag-badge-more {
+      font-weight: 600;
+      color: var(--text-subtle);
+    }
+
+    .btn-card-copy {
+      width: 100%;
+      height: 40px;
+      border-radius: var(--radius-pill);
+      background: var(--accent);
+      color: #FFFFFF;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background-color var(--duration) var(--ease), transform var(--duration) var(--ease);
+    }
+
+    .btn-card-copy:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-card-copy:active {
+      transform: scale(0.98);
+    }
+
+    .btn-card-copy.is-opening {
+      background: var(--text-main);
+      color: var(--bg);
+    }
+
+    /* Skeleton Loading Cards */
+    .skeleton-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-soft);
+      animation: skeletonPulse 1.4s infinite ease-in-out;
+    }
+
+    @keyframes skeletonPulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
+    .skeleton-img {
+      width: 100%;
+      aspect-ratio: 16 / 11;
+      background: var(--bg-subtle);
+    }
+
+    .skeleton-body {
+      padding: 16px 18px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .skeleton-line {
+      height: 12px;
+      border-radius: 4px;
+      background: var(--bg-subtle);
+    }
+
+    /* ==========================================================================
+       6. EXPLORE PAGE & FILTER BAR
+       ========================================================================== */
+    .explore-header {
+      padding-top: 36px;
+      margin-bottom: 28px;
+    }
+
+    .filter-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .chip-track {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+
+    .chip-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-chip {
+      white-space: nowrap;
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 0.84rem;
+      font-weight: 500;
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      transition: all var(--duration) var(--ease);
+    }
+
+    .category-chip:hover {
+      color: var(--text-main);
+      border-color: var(--text-muted);
+    }
+
+    .category-chip.active {
+      color: var(--text-main);
+      font-weight: 600;
+      background: var(--bg-subtle);
+      border-color: var(--border-strong);
+    }
+
+    .explore-meta-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 4px 2px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .explore-meta-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .results-count-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .btn-clear-filters {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      transition: all var(--duration) var(--ease);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-clear-filters:hover {
+      background: var(--accent);
+      color: #FFFFFF;
+    }
+
+    .sort-control-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sort-label {
+      font-size: 0.78rem;
+      color: var(--text-subtle);
+      font-weight: 500;
+    }
+
+    .sort-select {
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: var(--radius-pill);
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      color: var(--text-main);
+      outline: none;
+      cursor: pointer;
+      transition: all var(--duration) var(--ease);
+    }
+
+    .sort-select:hover, .sort-select:focus {
+      border-color: var(--text-main);
+    }
+
+    /* ==========================================================================
+       7. BASE DETAILS & CREATOR CALLOUT
+       ========================================================================== */
+    .detail-container {
+      max-width: 800px;
+      margin: 28px auto 0;
+    }
+
+    .detail-header-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .btn-detail-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      transition: all var(--duration) var(--ease);
+    }
+
+    .btn-detail-back:hover {
+      color: var(--text-main);
+      border-color: var(--text-muted);
+    }
+
+    .detail-breadcrumb {
+      font-size: 0.8rem;
+      color: var(--text-subtle);
+      font-weight: 500;
+    }
+
+    .detail-hero-frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      border-radius: var(--radius-lg);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-soft);
+      cursor: zoom-in;
+    }
+
+    .detail-hero-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 220ms var(--ease), filter 220ms var(--ease);
+    }
+
+    .detail-hero-frame:hover img {
+      transform: scale(1.02);
+      filter: brightness(0.94);
+    }
+
+    .detail-hero-frame:hover .expand-cue {
+      opacity: 1;
+    }
+
+    .detail-hero-frame:hover .expand-cue-pill {
+      transform: translateY(0);
+    }
+
+    .detail-heading {
+      font-size: clamp(1.6rem, 3.2vw, 2.1rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 8px;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+
+    .detail-meta-tags {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .detail-th-type-badge {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      background: var(--accent-soft);
+      color: var(--accent-on-soft);
+      text-transform: uppercase;
+    }
+
+    .detail-status-badge {
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .detail-lead {
+      font-size: 0.96rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 16px;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+
+    .detail-tags-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 26px;
+    }
+
+    .detail-actions-panel {
+      margin-bottom: 36px;
+    }
+
+    .detail-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn-primary-copy {
+      flex: 1.8;
+      min-width: 200px;
+      height: 50px;
+      min-height: 44px;
+      border-radius: var(--radius-pill);
+      background: var(--accent);
+      color: #FFFFFF;
+      font-size: 0.92rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: var(--shadow-soft);
+      transition: background-color var(--duration) var(--ease), transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
+    }
+
+    .btn-primary-copy:hover {
+      background: var(--accent-hover);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .btn-primary-copy:active {
+      transform: scale(0.99);
+    }
+
+    .btn-primary-copy.is-opening {
+      background: var(--text-main);
+      color: var(--bg);
+    }
+
+    .detail-secondary-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1.2;
+    }
+
+    .btn-secondary-save,
+    .btn-secondary-share {
+      flex: 1;
+      height: 50px;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text-main);
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all var(--duration) var(--ease);
+    }
+
+    .btn-secondary-save:hover,
+    .btn-secondary-share:hover {
+      border-color: var(--text-main);
+      background: var(--bg-subtle);
+    }
+
+    .btn-secondary-save.saved {
+      color: #E2483D;
+      border-color: #E2483D;
+      background: rgba(226, 72, 61, 0.06);
+    }
+
+    .deeplink-fallback-banner {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-strong);
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      animation: viewEnter var(--duration) var(--ease) forwards;
+    }
+
+    .deeplink-fallback-text {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .btn-fallback-copy-link {
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: var(--surface);
+      color: var(--text-main);
+      border: 1px solid var(--border-strong);
+      white-space: nowrap;
+      transition: all var(--duration) var(--ease);
+    }
+
+    .btn-fallback-copy-link:hover {
+      border-color: var(--text-main);
+    }
+
+    .btn-fallback-copy-link.copied {
+      background: var(--accent-soft);
+      color: var(--accent-on-soft);
+      border-color: transparent;
+    }
+
+    /* Owner Controls Bar on Base Details */
+    .owner-controls-bar {
+      display: none;
+      margin-top: 16px;
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px dashed var(--border-strong);
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .owner-controls-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .owner-controls-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Creator Information Banner on Base Details */
+    .base-creator-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 30px;
+      box-shadow: var(--shadow-soft);
+      transition: border-color var(--duration) var(--ease);
+    }
+
+    .base-creator-card:hover {
+      border-color: var(--border-strong);
+    }
+
+    .base-creator-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+    }
+
+    .base-creator-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--accent-soft);
+      flex-shrink: 0;
+    }
+
+    .base-creator-name {
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+
+    .base-creator-handle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .base-creator-followers {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+
+    .btn-follow {
+      height: 38px;
+      padding: 0 18px;
+      border-radius: var(--radius-pill);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      background: var(--accent);
+      color: #FFFFFF;
+      transition: all var(--duration) var(--ease);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .btn-follow:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-follow.following {
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      border: 1px solid var(--border-strong);
+    }
+
+    .btn-follow.following:hover {
+      background: var(--danger-soft);
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .detail-section-block {
+      border-top: 1px solid var(--border);
+      padding: 28px 0;
+    }
+
+    .detail-section-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      margin-bottom: 16px;
+    }
+
+    .detail-info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .detail-info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+    }
+
+    .detail-info-label {
+      font-size: 0.72rem;
+      color: var(--text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .detail-info-val {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .detail-body-p {
+      color: var(--text-muted);
+      font-size: 0.94rem;
+      line-height: 1.65;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+
+    /* ==========================================================================
+       8. CREATOR PUBLIC PROFILE VIEW
+       ========================================================================== */
+    .profile-hero {
+      padding: 44px 0 32px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 36px;
+    }
+
+    .profile-avatar-large {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--surface);
+      box-shadow: var(--shadow-hover);
+      margin-bottom: 14px;
+      background: var(--accent-soft);
+    }
+
+    .profile-display-name {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 2px;
+    }
+
+    .profile-username {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .profile-bio {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      max-width: 480px;
+      margin: 0 auto 18px;
+      line-height: 1.5;
+    }
+
+    .profile-stats-row {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 20px;
+    }
+
+    .profile-stat-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .profile-stat-val {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .profile-stat-lbl {
+      font-size: 0.72rem;
+      color: var(--text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ==========================================================================
+       9. AUTH MODAL (LOGIN / SIGNUP)
+       ========================================================================== */
+    .auth-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1200;
+      background: rgba(18, 22, 18, 0.52);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms var(--ease);
+    }
+
+    .auth-modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .auth-modal-card {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-hover);
+      padding: 32px 28px 28px;
+      transform: scale(0.97);
+      transition: transform 200ms var(--ease);
+    }
+
+    .auth-modal-overlay.open .auth-modal-card {
+      transform: scale(1);
+    }
+
+    .auth-modal-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .auth-modal-sub {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+    }
+
+    .auth-tab-switch {
+      display: flex;
+      background: var(--bg-subtle);
+      border-radius: var(--radius-pill);
+      padding: 3px;
+      gap: 2px;
+      margin-bottom: 20px;
+    }
+
+    .auth-tab-btn {
+      flex: 1;
+      padding: 7px 0;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-radius: var(--radius-pill);
+      color: var(--text-muted);
+      transition: all var(--duration) var(--ease);
+    }
+
+    .auth-tab-btn.active {
+      background: var(--surface);
+      color: var(--text-main);
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* ==========================================================================
+       10. CREATOR WALL POPUP (GLASS BLUR MODAL)
+       ========================================================================== */
+    .creator-wall-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      background: rgba(18, 22, 18, 0.46);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms var(--ease);
+    }
+
+    [data-theme="dark"] .creator-wall-overlay {
+      background: rgba(8, 10, 8, 0.68);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .creator-wall-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .creator-wall-modal {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      max-height: min(92vh, 760px);
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 24px 64px -12px rgba(18, 24, 18, 0.18), 0 2px 6px rgba(18, 24, 18, 0.04);
+      padding: 34px 28px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transform: scale(0.97);
+      transition: transform 200ms var(--ease);
+      scrollbar-width: thin;
+    }
+
+    [data-theme="dark"] .creator-wall-modal {
+      background: rgba(28, 33, 27, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 28px 70px -12px rgba(0, 0, 0, 0.65), 0 2px 6px rgba(255, 255, 255, 0.03);
+    }
+
+    .creator-wall-overlay.open .creator-wall-modal {
+      transform: scale(1);
+    }
+
+    .creator-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--duration) var(--ease);
+      z-index: 2;
+    }
+
+    .creator-close-btn:hover {
+      color: var(--text-main);
+      border-color: var(--border-strong);
+      transform: scale(1.06);
+    }
+
+    .creator-avatar-container {
+      position: relative;
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      margin: 4px auto 14px;
+      padding: 3px;
+      background: linear-gradient(135deg, var(--border-strong), var(--accent));
+      box-shadow: var(--shadow-soft);
+      flex-shrink: 0;
+    }
+
+    .creator-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      background: var(--bg-subtle);
+      display: block;
+    }
+
+    .creator-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-main);
+      line-height: 1.25;
+      margin-bottom: 2px;
+    }
+
+    .creator-role-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .creator-quote {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      font-style: italic;
+      max-width: 320px;
+      margin: 0 auto 20px;
+    }
+
+    .creator-divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 18px;
+    }
+
+    .creator-links-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .creator-link-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 0.84rem;
+      font-weight: 600;
+      transition: all var(--duration) var(--ease);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .creator-link-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-soft);
+      background: var(--bg-subtle);
+    }
+
+    .creator-link-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .creator-link-icon {
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      transition: color var(--duration) var(--ease);
+    }
+
+    .creator-link-card:hover .creator-link-icon {
+      color: var(--text-main);
+    }
+
+    .creator-link-arrow {
+      color: var(--text-subtle);
+      flex-shrink: 0;
+      transition: transform var(--duration) var(--ease), color var(--duration) var(--ease);
+    }
+
+    .creator-link-card:hover .creator-link-arrow {
+      color: var(--accent);
+      transform: translate(2px, -2px);
+    }
+
+    .creator-link-network {
+      grid-column: 1 / -1;
+      padding: 12px 16px;
+      background: var(--accent-soft);
+      color: var(--accent-on-soft);
+      border: 1px solid rgba(62, 84, 55, 0.18);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    [data-theme="dark"] .creator-link-network {
+      border-color: rgba(120, 153, 111, 0.28);
+    }
+
+    .creator-link-network:hover {
+      background: var(--accent);
+      color: #FFFFFF;
+      border-color: var(--accent);
+    }
+
+    .creator-link-network .creator-link-icon,
+    .creator-link-network .creator-link-arrow {
+      color: currentColor;
+    }
+
+    /* ==========================================================================
+       11. SUBMIT, MY BASES & SETTINGS
+       ========================================================================== */
+    .page-container {
+      max-width: 680px;
+      margin: 36px auto 0;
+    }
+
+    .page-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .page-title {
+      font-size: 2.1rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .page-quote {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      font-style: italic;
+    }
+
+    .demo-callout {
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-strong);
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 28px;
+    }
+
+    .card-panel {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 24px;
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 24px;
+    }
+
+    .card-panel-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: 16px;
+    }
+
+    .form-field {
+      margin-bottom: 16px;
+    }
+
+    .form-caption-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+
+    .form-caption {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-text-input,
+    .form-dropdown,
+    .form-textarea-input {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong);
+      background: var(--bg);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border var(--duration) var(--ease), background var(--duration) var(--ease);
+    }
+
+    .form-text-input:focus,
+    .form-dropdown:focus,
+    .form-textarea-input:focus {
+      border-color: var(--text-main);
+      background: var(--surface);
+    }
+
+    .form-duo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field-error-msg {
+      display: none;
+      font-size: 0.75rem;
+      color: var(--danger);
+      margin-top: 4px;
+    }
+
+    .has-error .form-text-input,
+    .has-error .form-textarea-input,
+    .has-error .form-dropdown {
+      border-color: var(--danger);
+    }
+
+    .has-error .field-error-msg {
+      display: block;
+    }
+
+    .btn-full-primary {
+      width: 100%;
+      height: 48px;
+      border-radius: var(--radius-pill);
+      background: var(--accent);
+      color: #FFFFFF;
+      font-weight: 600;
+      font-size: 0.92rem;
+      letter-spacing: 0.02em;
+      transition: background-color var(--duration) var(--ease);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-full-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-full-secondary {
+      width: 100%;
+      height: 48px;
+      border-radius: var(--radius-pill);
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.92rem;
+      letter-spacing: 0.02em;
+      transition: all var(--duration) var(--ease);
+    }
+
+    .btn-full-secondary:hover {
+      background: var(--bg-subtle);
+    }
+
+    .sub-item-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+    }
+
+    .sub-item-thumb {
+      width: 54px;
+      height: 54px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      background: var(--bg-subtle);
+      flex-shrink: 0;
+    }
+
+    .sub-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sub-item-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sub-item-meta {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .status-badge-chip {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .status-published {
+      background: var(--accent-soft);
+      color: var(--accent-on-soft);
+    }
+
+    .status-draft {
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-sub-action {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: all var(--duration) var(--ease);
+      flex-shrink: 0;
+    }
+
+    .btn-sub-action:hover {
+      color: var(--text-main);
+      background: var(--surface);
+    }
+
+    .btn-sub-delete:hover {
+      color: var(--danger) !important;
+      background: var(--danger-soft) !important;
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .settings-row:last-child {
+      border-bottom: none;
+    }
+
+    .settings-label-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .settings-label-sub {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .settings-segment-ctrl {
+      display: inline-flex;
+      background: var(--bg);
+      border: 1px solid var(--border-strong);
+      padding: 3px;
+      border-radius: var(--radius-pill);
+      gap: 2px;
+    }
+
+    .settings-segment-btn {
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: var(--radius-pill);
+      transition: all var(--duration) var(--ease);
+    }
+
+    .settings-segment-btn.active {
+      background: var(--surface);
+      color: var(--text-main);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .stat-badge-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat-pill-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      text-align: center;
+    }
+
+    .stat-pill-num {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .stat-pill-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .btn-settings-action {
+      padding: 8px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text-main);
+      transition: all var(--duration) var(--ease);
+    }
+
+    .btn-settings-action:hover {
+      border-color: var(--text-main);
+    }
+
+    .btn-settings-danger {
+      color: var(--danger);
+      border-color: rgba(180, 70, 56, 0.3);
+    }
+
+    .btn-settings-danger:hover {
+      background: var(--danger-soft);
+      border-color: var(--danger);
+    }
+
+    /* ==========================================================================
+       12. FULLSCREEN BASE PREVIEW OVERLAY
+       ========================================================================== */
+    .fullscreen-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(14, 16, 14, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 190ms var(--ease);
+      cursor: zoom-out;
+    }
+
+    .fullscreen-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .fullscreen-close-btn {
+      position: absolute;
+      top: 22px;
+      right: 24px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 180ms var(--ease), transform 180ms var(--ease);
+      z-index: 1010;
+      cursor: pointer;
+    }
+
+    .fullscreen-close-btn:hover {
+      background: rgba(255, 255, 255, 0.24);
+      transform: scale(1.05);
+    }
+
+    .fullscreen-dialog-box {
+      position: relative;
+      max-width: 94vw;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transform: scale(0.96);
+      transition: transform 210ms var(--ease);
+      cursor: default;
+    }
+
+    .fullscreen-overlay.open .fullscreen-dialog-box {
+      transform: scale(1);
+    }
+
+    .fullscreen-img {
+      max-width: 92vw;
+      max-height: 84vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: var(--radius-md);
+      box-shadow: 0 24px 60px -8px rgba(0, 0, 0, 0.6);
+      user-select: none;
+    }
+
+    .fullscreen-caption {
+      margin-top: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.75);
+      letter-spacing: 0.01em;
+      text-align: center;
+    }
+
+    /* ==========================================================================
+       13. EMPTY STATES, TOAST & MINIMAL FOOTER
+       ========================================================================== */
+    .empty-block {
+      text-align: center;
+      padding: 72px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-block-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .empty-block-sub {
+      font-size: 0.86rem;
+      max-width: 340px;
+      margin: 0 auto 20px;
+      line-height: 1.5;
+    }
+
+    .btn-empty-action {
+      padding: 9px 20px;
+      border-radius: var(--radius-pill);
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: var(--accent);
+      color: #FFFFFF;
+      border: none;
+      transition: background-color var(--duration) var(--ease);
+    }
+
+    .btn-empty-action:hover {
+      background: var(--accent-hover);
+    }
+
+    .toast-pill {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(30px);
+      opacity: 0;
+      background: var(--text-main);
+      color: var(--bg);
+      padding: 10px 22px;
+      border-radius: var(--radius-pill);
+      font-size: 0.84rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-hover);
+      z-index: 1500;
+      transition: all var(--duration) var(--ease);
+      pointer-events: none;
+    }
+
+    .toast-pill.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .site-footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+      padding: 24px 0 32px;
+      font-size: 0.78rem;
+      color: var(--text-subtle);
+      text-align: center;
+    }
+
+    /* ==========================================================================
+       14. MOBILE BOTTOM BAR
+       ========================================================================== */
+    .bottom-nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: rgba(248, 246, 242, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border);
+      z-index: 50;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 6px;
+    }
+
+    [data-theme="dark"] .bottom-nav-bar {
+      background: rgba(20, 22, 19, 0.94);
+    }
+
+    .b-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      width: 58px;
+      height: 48px;
+      border-radius: 12px;
+      transition: color var(--duration) var(--ease);
+    }
+
+    .b-nav-item.active {
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    /* ==========================================================================
+       15. RESPONSIVE BREAKPOINTS
+       ========================================================================== */
+    @media (max-width: 992px) {
+      .base-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .desktop-only {
+        display: none !important;
+      }
+
+      .bottom-nav-bar {
+        display: flex !important;
+      }
+
+      main {
+        padding-bottom: 96px;
+      }
+
+      .container {
+        padding: 0 18px;
+      }
+
+      .header-inner {
+        height: 60px;
+      }
+
+      .btn-creator-trigger {
+        height: 34px;
+        padding: 0 11px;
+        font-size: 0.78rem;
+      }
+
+      .btn-auth-trigger {
+        height: 34px;
+        padding: 0 12px;
+        font-size: 0.78rem;
+      }
+
+      .hero {
+        padding: 48px 0 32px;
+      }
+
+      .hero-heading {
+        font-size: 2.2rem;
+      }
+
+      .hero-search-wrapper {
+        margin-bottom: 18px;
+      }
+
+      .hero-search-input {
+        height: 48px;
+        font-size: 0.88rem;
+      }
+
+      .base-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px;
+      }
+
+      .detail-breadcrumb {
+        display: none;
+      }
+
+      .detail-info-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .card-figure {
+        aspect-ratio: 16 / 10;
+      }
+
+      .card-content {
+        padding: 14px 16px 16px;
+      }
+
+      .detail-actions-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+
+      .btn-primary-copy {
+        width: 100%;
+        height: 52px;
+      }
+
+      .detail-secondary-actions {
+        width: 100%;
+        gap: 12px;
+      }
+
+      .btn-secondary-save, .btn-secondary-share {
+        height: 48px;
+        border-radius: var(--radius-pill);
+      }
+
+      .deeplink-fallback-banner {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+      }
+
+      .btn-fallback-copy-link {
+        width: 100%;
+        height: 38px;
+      }
+
+      .base-creator-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+      }
+
+      .btn-follow {
+        width: 100%;
+        height: 42px;
+      }
+
+      .stat-badge-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .creator-wall-modal {
+        padding: 28px 18px 24px;
+        max-width: 94vw;
+      }
+
+      .creator-links-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       SITE HEADER
+       ========================================================================== -->
+  <header class="header">
+    <div class="container header-inner">
+      <div class="brand" onclick="navigateTo('home')">
+        <span class="brand-dot"></span>
+        <span>BASEFORGE</span>
+      </div>
+
+      <nav class="nav-tabs desktop-only" aria-label="Desktop Navigation">
+        <button class="nav-link active" data-view="home" onclick="navigateTo('home')">Home</button>
+        <button class="nav-link" data-view="explore" onclick="navigateTo('explore')">Explore</button>
+        <button class="nav-link" data-view="saved" onclick="navigateTo('saved')">Saved</button>
+        <button class="nav-link" data-view="submit" onclick="navigateTo('submit')">Create Base</button>
+        <button class="nav-link" data-view="settings" onclick="navigateTo('settings')">Settings</button>
+      </nav>
+
+      <div class="header-actions">
+        <!-- Creator Wall Trigger -->
+        <button 
+          class="btn-creator-trigger" 
+          id="creatorWallTriggerBtn"
+          onclick="openCreatorWall()" 
+          title="Open Creator Wall" 
+          aria-label="Creator Wall"
+        >
+          <span class="creator-sparkle-glyph">✦</span>
+          <span>Creator</span>
+        </button>
+
+        <!-- Auth Controls -->
+        <div id="authHeaderSlot">
+          <button class="btn-auth-trigger" onclick="openAuthModal('login')">
+            <span>Log In</span>
+          </button>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="btn-icon-subtle" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme">
+          <svg id="themeIconSvg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       MAIN CONTENT VIEWS
+       ========================================================================== -->
+  <main class="container">
+
+    <!-- VIEW: HOME -->
+    <section id="view-home" class="view active-view">
+      <div class="hero">
+        <div class="hero-eyebrow">Clash of Clans Base Library</div>
+        <h1 class="hero-heading">Find a base<br>worth defending.</h1>
+
+        <div class="hero-search-wrapper">
+          <svg class="hero-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input 
+            type="text" 
+            class="hero-search-input" 
+            placeholder="Search bases... (e.g. TH18 war, farming, anti 3-star)" 
+            onkeydown="if(event.key === 'Enter') handleHeroSearchTrigger(this.value)"
+            aria-label="Search bases from home"
+          />
+        </div>
+
+        <div class="th-pill-list">
+          <button class="th-chip" onclick="quickFilterTH(18)">TH18</button>
+          <button class="th-chip" onclick="quickFilterTH(17)">TH17</button>
+          <button class="th-chip" onclick="quickFilterTH(16)">TH16</button>
+          <button class="th-chip" onclick="quickFilterTH(15)">TH15</button>
+          <button class="th-chip" onclick="quickFilterTH(14)">TH14</button>
+          <button class="th-chip" onclick="quickFilterTH(13)">TH13</button>
+          <button class="th-chip" onclick="quickFilterTH(12)">TH12</button>
+        </div>
+      </div>
+
+      <!-- Featured Bases -->
+      <div>
+        <div class="section-header">
+          <h2 class="section-heading">Featured Bases</h2>
+          <button class="section-action" onclick="navigateTo('explore')">See all &rarr;</button>
+        </div>
+        <div class="base-grid" id="featuredGridContainer"></div>
+      </div>
+
+      <!-- Recently Viewed -->
+      <div id="recentSectionWrapper" style="display: none;">
+        <div class="section-header">
+          <h2 class="section-heading">Recently Viewed</h2>
+          <button class="section-action" style="color: var(--text-muted); font-size: 0.8rem;" onclick="clearRecentlyViewed()">Clear</button>
+        </div>
+        <div class="base-grid" id="recentGridContainer"></div>
+      </div>
+    </section>
+
+    <!-- VIEW: EXPLORE -->
+    <section id="view-explore" class="view">
+      <div class="explore-header">
+        <h1 class="section-heading" style="font-size: 1.85rem; margin-bottom: 20px;">Explore Bases</h1>
+
+        <div class="filter-wrapper">
+          <div class="hero-search-wrapper" style="max-width: 100%; margin: 0;">
+            <svg class="hero-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input 
+              type="text" 
+              id="exploreSearchField" 
+              class="hero-search-input" 
+              placeholder="Search by keyword, TH, type, tags... (e.g. TH17 war, cwl, anti air)" 
+              oninput="handleExploreSearch(this.value)"
+              aria-label="Search explore bases"
+            />
+          </div>
+
+          <!-- Type Filters -->
+          <div class="chip-track" id="categoryChipTrack">
+            <button class="category-chip active" data-val="All" onclick="setCategoryFilter('All')">All</button>
+            <button class="category-chip" data-val="War" onclick="setCategoryFilter('War')">War</button>
+            <button class="category-chip" data-val="CWL" onclick="setCategoryFilter('CWL')">CWL</button>
+            <button class="category-chip" data-val="Farming" onclick="setCategoryFilter('Farming')">Farming</button>
+            <button class="category-chip" data-val="Trophy" onclick="setCategoryFilter('Trophy')">Trophy</button>
+            <button class="category-chip" data-val="Hybrid" onclick="setCategoryFilter('Hybrid')">Hybrid</button>
+          </div>
+
+          <!-- Town Hall Filters -->
+          <div class="chip-track" id="thChipTrack">
+            <button class="th-chip active" data-val="All" onclick="setTownHallFilter('All')">All TH</button>
+            <button class="th-chip" data-val="18" onclick="setTownHallFilter(18)">TH18</button>
+            <button class="th-chip" data-val="17" onclick="setTownHallFilter(17)">TH17</button>
+            <button class="th-chip" data-val="16" onclick="setTownHallFilter(16)">TH16</button>
+            <button class="th-chip" data-val="15" onclick="setTownHallFilter(15)">TH15</button>
+            <button class="th-chip" data-val="14" onclick="setTownHallFilter(14)">TH14</button>
+            <button class="th-chip" data-val="13" onclick="setTownHallFilter(13)">TH13</button>
+            <button class="th-chip" data-val="12" onclick="setTownHallFilter(12)">TH12</button>
+          </div>
+        </div>
+
+        <div class="explore-meta-bar">
+          <div class="explore-meta-left">
+            <span class="results-count-text" id="exploreResultsCount">0 bases</span>
+            <button class="btn-clear-filters" id="btnClearFilters" onclick="resetAllFilters()" style="display: none;" title="Reset all search and filter conditions">
+              CLEAR FILTERS &times;
+            </button>
+          </div>
+          <div class="sort-control-wrap">
+            <label class="sort-label" for="sortSelect">Sort</label>
+            <select id="sortSelect" class="sort-select" onchange="handleSortChange(this.value)" aria-label="Sort bases">
+              <option value="featured" selected>Featured</option>
+              <option value="newest">Newest</option>
+              <option value="az">A–Z</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="base-grid" id="exploreGridContainer"></div>
+
+        <!-- Empty State -->
+        <div id="exploreEmptyState" class="empty-block" style="display: none;">
+          <div class="empty-block-title">No bases found.</div>
+          <p class="empty-block-sub">Try another search or filter.</p>
+          <button class="btn-empty-action" onclick="resetAllFilters()">Reset Filters</button>
+        </div>
+
+        <!-- Error State -->
+        <div id="exploreErrorState" class="empty-block" style="display: none;">
+          <div class="empty-block-title" style="color: var(--danger);">Failed to load bases.</div>
+          <p class="empty-block-sub" id="exploreErrorMsg">There was an issue connecting to the database.</p>
+          <button class="btn-empty-action" onclick="loadBasesFromSupabase()">Try Again</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: SAVED -->
+    <section id="view-saved" class="view">
+      <div style="padding-top: 36px;">
+        <h1 class="section-heading" style="font-size: 1.85rem; margin-bottom: 24px;">Saved Bases</h1>
+
+        <div class="base-grid" id="savedGridContainer"></div>
+
+        <div id="savedEmptyState" class="empty-block" style="display: none;">
+          <div class="empty-block-title">Nothing saved yet.</div>
+          <p class="empty-block-sub">Save bases you want to come back to later.</p>
+          <button class="btn-empty-action" onclick="navigateTo('explore')">EXPLORE BASES</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: BASE DETAILS -->
+    <section id="view-detail" class="view">
+      <div class="detail-container">
+        
+        <div class="detail-header-nav">
+          <button class="btn-detail-back" onclick="navigateBack()" aria-label="Go back to previous page">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Back
+          </button>
+          <span class="detail-breadcrumb" id="detailBreadcrumb">Explore / TH17 / War</span>
+        </div>
+
+        <!-- Large Base Preview -->
+        <div class="detail-hero-frame" id="detailHeroContainer" title="Click to view fullscreen">
+          <img id="dImage" src="" alt="Clash layout preview">
+          <div class="expand-cue">
+            <span class="expand-cue-pill">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <polyline points="9 21 3 21 3 15"></polyline>
+                <line x1="21" y1="3" x2="14" y2="10"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+              </svg>
+              View larger
+            </span>
+          </div>
+        </div>
+
+        <!-- Base Name -->
+        <h1 class="detail-heading" id="dTitle">Base Name</h1>
+
+        <!-- Badges -->
+        <div class="detail-meta-tags">
+          <span class="detail-th-type-badge" id="dMetaBadge">TH17 &bull; WAR</span>
+          <span class="detail-status-badge" id="dStatusBadge" style="display: none;">DRAFT</span>
+        </div>
+
+        <!-- Short Description -->
+        <p class="detail-lead" id="dDesc">Short summary of base.</p>
+
+        <!-- Tags -->
+        <div class="detail-tags-row" id="dTags"></div>
+
+        <!-- Actions -->
+        <div class="detail-actions-panel">
+          <div class="detail-actions-row">
+            <button class="btn-primary-copy" id="dCopyBtn" onclick="handleDetailCopyAction()">
+              <svg id="dCopyIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span id="dCopyText">COPY BASE</span>
+            </button>
+
+            <div class="detail-secondary-actions">
+              <button class="btn-secondary-save" id="dSaveBtn" onclick="handleDetailSaveToggle()" aria-label="Save layout">
+                <svg id="dSaveIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <span id="dSaveText">SAVE</span>
+              </button>
+
+              <button class="btn-secondary-share" onclick="handleDetailShare()" title="Share Base" aria-label="Share Base">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="18" cy="5" r="3"></circle>
+                  <circle cx="6" cy="12" r="3"></circle>
+                  <circle cx="18" cy="19" r="3"></circle>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+                <span>SHARE</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Owner Edit / Delete Controls -->
+          <div class="owner-controls-bar" id="dOwnerControls">
+            <div class="owner-controls-left">
+              <span>✦ You created this base</span>
+            </div>
+            <div class="owner-controls-actions">
+              <button class="btn-settings-action" onclick="openEditBase(currentSelectedId)">Edit</button>
+              <button class="btn-settings-action btn-settings-danger" onclick="deleteExistingBase(currentSelectedId)">Delete</button>
+            </div>
+          </div>
+
+          <div class="deeplink-fallback-banner" id="deeplinkFallbackBanner">
+            <span class="deeplink-fallback-text" id="fallbackBannerNotice">
+              Unable to open Clash of Clans? You can copy the base link instead.
+            </span>
+            <button class="btn-fallback-copy-link" id="fallbackCopyBtn" onclick="handleFallbackCopyLink()">
+              COPY LINK
+            </button>
+          </div>
+        </div>
+
+        <!-- CREATOR SECTION -->
+        <div class="base-creator-card" id="baseCreatorCard">
+          <div class="base-creator-info" onclick="handleCreatorCardClick()">
+            <img class="base-creator-avatar" id="baseCreatorAvatar" src="" alt="Creator avatar" onerror="this.src=CLEAN_FALLBACK_SVG">
+            <div>
+              <div class="base-creator-name" id="baseCreatorName">BaseForge Official</div>
+              <div class="base-creator-handle" id="baseCreatorHandle">@baseforge</div>
+              <div class="base-creator-followers" id="baseCreatorFollowers">0 followers</div>
+            </div>
+          </div>
+          <div>
+            <button class="btn-follow" id="baseCreatorFollowBtn" onclick="handleToggleFollowCreator()">
+              Follow
+            </button>
+          </div>
+        </div>
+
+        <!-- BASE INFORMATION -->
+        <div class="detail-section-block">
+          <h3 class="detail-section-title">BASE INFORMATION</h3>
+          <div class="detail-info-grid">
+            <div class="detail-info-card">
+              <div class="detail-info-label">Town Hall</div>
+              <div class="detail-info-val" id="dInfoTH">TH17</div>
+            </div>
+            <div class="detail-info-card">
+              <div class="detail-info-label">Type</div>
+              <div class="detail-info-val" id="dInfoType">War</div>
+            </div>
+            <div class="detail-info-card">
+              <div class="detail-info-label">Purpose</div>
+              <div class="detail-info-val" id="dInfoPurpose">Clan War</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="detail-section-block">
+          <h3 class="detail-section-title">DESCRIPTION</h3>
+          <p class="detail-body-p" id="dFullDesc"></p>
+        </div>
+
+        <!-- RELATED BASES -->
+        <div class="detail-section-block">
+          <h3 class="detail-section-title">RELATED BASES</h3>
+          <div class="base-grid" id="relatedGridContainer"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- VIEW: CREATOR PUBLIC PROFILE -->
+    <section id="view-creator-profile" class="view">
+      <div class="page-container" style="max-width: 900px;">
+        <button class="btn-detail-back" onclick="navigateBack()" style="margin-bottom: 20px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back
+        </button>
+
+        <div class="profile-hero">
+          <img class="profile-avatar-large" id="cpAvatar" src="" alt="Profile Avatar" onerror="this.src=CLEAN_FALLBACK_SVG">
+          <h1 class="profile-display-name" id="cpDisplayName">Creator Name</h1>
+          <div class="profile-username" id="cpUsername">@username</div>
+          <p class="profile-bio" id="cpBio">Builder & defender.</p>
+
+          <div class="profile-stats-row">
+            <div class="profile-stat-box">
+              <div class="profile-stat-val" id="cpFollowersCount">0</div>
+              <div class="profile-stat-lbl">Followers</div>
+            </div>
+            <div class="profile-stat-box">
+              <div class="profile-stat-val" id="cpFollowingCount">0</div>
+              <div class="profile-stat-lbl">Following</div>
+            </div>
+            <div class="profile-stat-box">
+              <div class="profile-stat-val" id="cpBasesCount">0</div>
+              <div class="profile-stat-lbl">Bases</div>
+            </div>
+          </div>
+
+          <button class="btn-follow" id="cpFollowBtn" onclick="handleProfileToggleFollow()">
+            Follow
+          </button>
+        </div>
+
+        <div class="section-header">
+          <h2 class="section-heading">Published Bases</h2>
+        </div>
+        <div class="base-grid" id="cpBasesGrid"></div>
+        <div id="cpEmptyBases" class="empty-block" style="display: none;">
+          <div class="empty-block-title">No published bases yet.</div>
+          <p class="empty-block-sub">This creator has not published any bases yet.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: SUBMIT / CREATE / EDIT BASE -->
+    <section id="view-submit" class="view">
+      <div class="page-container">
+        <div class="page-eyebrow" id="formPageEyebrow">Create</div>
+        <h1 class="page-title" id="formPageTitle">Publish a base.</h1>
+        <p class="page-quote" id="formPageQuote">“Share a layout with the community. Every layout is instantly verified and added to the library.”</p>
+        
+        <div class="demo-callout" id="formAuthWarning" style="display: none;">
+          &gt; You must be logged in to create and manage cloud bases.
+        </div>
+
+        <form id="baseSubmitForm" class="card-panel" onsubmit="handleFormSubmission(event)" novalidate>
+          <input type="hidden" id="subEditId" value="">
+
+          <div class="form-field" id="field-name">
+            <div class="form-caption-row">
+              <label class="form-caption" for="subName">Base Name *</label>
+            </div>
+            <input type="text" id="subName" class="form-text-input" placeholder="e.g. Anti-3 Star CWL Ring" maxlength="60" required>
+            <div class="field-error-msg">Base name is required (3–60 characters).</div>
+          </div>
+
+          <div class="form-duo">
+            <div class="form-field" id="field-th">
+              <div class="form-caption-row">
+                <label class="form-caption" for="subTH">Town Hall *</label>
+              </div>
+              <select id="subTH" class="form-dropdown">
+                <option value="18">TH18</option>
+                <option value="17">TH17</option>
+                <option value="16" selected>TH16</option>
+                <option value="15">TH15</option>
+                <option value="14">TH14</option>
+                <option value="13">TH13</option>
+                <option value="12">TH12</option>
+                <option value="11">TH11</option>
+                <option value="10">TH10</option>
+              </select>
+            </div>
+
+            <div class="form-field" id="field-purpose">
+              <div class="form-caption-row">
+                <label class="form-caption" for="subPurpose">Base Type *</label>
+              </div>
+              <select id="subPurpose" class="form-dropdown">
+                <option value="War" selected>War</option>
+                <option value="CWL">CWL</option>
+                <option value="Farming">Farming</option>
+                <option value="Trophy">Trophy</option>
+                <option value="Hybrid">Hybrid</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-field" id="field-link">
+            <div class="form-caption-row">
+              <label class="form-caption" for="subLink">Base Link *</label>
+            </div>
+            <input type="url" id="subLink" class="form-text-input" placeholder="https://link.clashofclans.com/en?action=OpenLayout&id=..." required>
+            <div class="field-error-msg">Please enter a valid Clash base link.</div>
+          </div>
+
+          <div class="form-field">
+            <div class="form-caption-row">
+              <label class="form-caption" for="subDesc">Description (Optional)</label>
+            </div>
+            <textarea id="subDesc" class="form-textarea-input" rows="3" placeholder="Explain layout compartments, trap baits, or defensive focus..." maxlength="280"></textarea>
+          </div>
+
+          <div class="form-duo">
+            <div class="form-field">
+              <div class="form-caption-row">
+                <label class="form-caption" for="subTags">Tags (Comma-separated)</label>
+              </div>
+              <input type="text" id="subTags" class="form-text-input" placeholder="e.g. Anti 3-Star, Clan War, Anti Air">
+            </div>
+
+            <div class="form-field" id="field-img">
+              <div class="form-caption-row">
+                <label class="form-caption" for="subImg">Screenshot URL *</label>
+              </div>
+              <input type="url" id="subImg" class="form-text-input" placeholder="https://images.unsplash.com/..." required>
+              <div class="field-error-msg">Please enter a valid image URL.</div>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <div class="form-caption-row">
+              <label class="form-caption" for="subStatus">Publication Status</label>
+            </div>
+            <select id="subStatus" class="form-dropdown">
+              <option value="published" selected>Publish Immediately</option>
+              <option value="draft">Save as Draft (Private to you)</option>
+            </select>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 12px;">
+            <button type="submit" class="btn-full-primary" id="subSubmitBtn">Save &amp; Publish</button>
+            <button type="button" class="btn-full-secondary" id="subCancelEditBtn" style="display: none;" onclick="cancelBaseEdit()">Cancel</button>
+          </div>
+        </form>
+
+        <!-- User Bases List -->
+        <div style="margin-top: 40px;">
+          <h2 class="section-heading" style="font-size: 1.25rem; margin-bottom: 14px;" id="userBasesHeading">Your Bases &amp; Drafts</h2>
+          <div id="userBasesList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: SETTINGS -->
+    <section id="view-settings" class="view">
+      <div class="page-container">
+        <div class="page-eyebrow">Preferences</div>
+        <h1 class="page-title">Settings</h1>
+        <p class="page-quote">“Configure visual preferences, account settings, and manage your bases.”</p>
+
+        <!-- Account Profile Panel -->
+        <div class="card-panel" id="settingsProfilePanel" style="display: none;">
+          <div class="card-panel-title">Your Profile</div>
+          <div class="form-field">
+            <label class="form-caption" for="setDisplayName">Display Name</label>
+            <input type="text" id="setDisplayName" class="form-text-input">
+          </div>
+          <div class="form-field">
+            <label class="form-caption" for="setUsername">Username</label>
+            <input type="text" id="setUsername" class="form-text-input" placeholder="letters_numbers_only">
+          </div>
+          <div class="form-field">
+            <label class="form-caption" for="setAvatarUrl">Avatar URL</label>
+            <input type="url" id="setAvatarUrl" class="form-text-input" placeholder="https://...">
+          </div>
+          <div class="form-field">
+            <label class="form-caption" for="setBio">Bio</label>
+            <textarea id="setBio" class="form-textarea-input" rows="2" maxlength="160"></textarea>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-settings-action" onclick="saveProfileChanges()">Update Profile</button>
+            <button class="btn-settings-action btn-settings-danger" onclick="handleAuthSignOut()">Log Out</button>
+          </div>
+        </div>
+
+        <div class="card-panel">
+          <div class="card-panel-title">Appearance</div>
+
+          <div class="settings-row">
+            <div>
+              <div class="settings-label-title">Theme</div>
+              <div class="settings-label-sub">Adjust light, dark or follow system OS</div>
+            </div>
+            <div class="settings-segment-ctrl" id="themeSegmentCtrl">
+              <button class="settings-segment-btn" data-theme-val="light" onclick="setThemePreference('light')">Light</button>
+              <button class="settings-segment-btn" data-theme-val="dark" onclick="setThemePreference('dark')">Dark</button>
+              <button class="settings-segment-btn" data-theme-val="system" onclick="setThemePreference('system')">System</button>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div>
+              <div class="settings-label-title">Layout Density</div>
+              <div class="settings-label-sub">Grid cards or compact inspection view</div>
+            </div>
+            <div class="settings-segment-ctrl" id="viewSegmentCtrl">
+              <button class="settings-segment-btn" data-view-val="grid" onclick="setViewModePreference('grid')">Grid</button>
+              <button class="settings-segment-btn" data-view-val="compact" onclick="setViewModePreference('compact')">Compact</button>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div>
+              <div class="settings-label-title">Reduce Motion</div>
+              <div class="settings-label-sub">Disable subtle transitions & animations</div>
+            </div>
+            <div class="settings-segment-ctrl" id="motionSegmentCtrl">
+              <button class="settings-segment-btn" data-motion-val="false" onclick="setMotionPreference(false)">Off</button>
+              <button class="settings-segment-btn" data-motion-val="true" onclick="setMotionPreference(true)">On</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-panel">
+          <div class="card-panel-title">Data Storage</div>
+          <div class="stat-badge-grid">
+            <div class="stat-pill-box">
+              <div class="stat-pill-num" id="statSavedCount">0</div>
+              <div class="stat-pill-label">Saved Bases</div>
+            </div>
+            <div class="stat-pill-box">
+              <div class="stat-pill-num" id="statBasesCount">0</div>
+              <div class="stat-pill-label">Total Bases</div>
+            </div>
+            <div class="stat-pill-box">
+              <div class="stat-pill-num" id="statMyBasesCount">0</div>
+              <div class="stat-pill-label">My Bases</div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-settings-action" onclick="exportAppData()">Export Data</button>
+            <button class="btn-settings-action btn-settings-danger" onclick="clearAllLocalData()">Clear Local Cache</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================================================
+       CLEAN SINGLE FOOTER
+       ========================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div>BASEFORGE &middot; Find. Copy. Defend. &middot; Fan-made base library. Not affiliated with Supercell.</div>
+    </div>
+  </footer>
+
+  <!-- ==========================================================================
+       AUTHENTICATION MODAL
+       ========================================================================== -->
+  <div id="authModalOverlay" class="auth-modal-overlay" onclick="handleAuthBackdropClick(event)">
+    <div class="auth-modal-card" onclick="event.stopPropagation()">
+      <button class="creator-close-btn" onclick="closeAuthModal()" aria-label="Close dialog">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="auth-tab-switch">
+        <button class="auth-tab-btn active" id="tabBtnLogin" onclick="switchAuthTab('login')">Log In</button>
+        <button class="auth-tab-btn" id="tabBtnSignup" onclick="switchAuthTab('signup')">Sign Up</button>
+      </div>
+
+      <h2 class="auth-modal-title" id="authModalTitle">Welcome back</h2>
+      <p class="auth-modal-sub" id="authModalSub">Log in to publish and manage defense layouts.</p>
+
+      <form id="authForm" onsubmit="handleAuthSubmit(event)">
+        <div class="form-field" id="authNameField" style="display: none;">
+          <label class="form-caption" for="authDisplayName">Display Name</label>
+          <input type="text" id="authDisplayName" class="form-text-input" placeholder="e.g. MasterBuilder">
+        </div>
+
+        <div class="form-field">
+          <label class="form-caption" for="authEmail">Email address</label>
+          <input type="email" id="authEmail" class="form-text-input" placeholder="name@example.com" required>
+        </div>
+
+        <div class="form-field">
+          <label class="form-caption" for="authPassword">Password</label>
+          <input type="password" id="authPassword" class="form-text-input" placeholder="••••••••" minlength="6" required>
+        </div>
+
+        <div class="field-error-msg" id="authErrorMsg" style="margin-bottom: 12px;"></div>
+
+        <button type="submit" class="btn-full-primary" id="authSubmitBtn">
+          Log In
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       CREATOR WALL POPUP
+       ========================================================================== -->
+  <div 
+    id="creatorWallOverlay" 
+    class="creator-wall-overlay" 
+    role="dialog" 
+    aria-modal="true" 
+    aria-labelledby="creatorWallTitle"
+    onclick="handleCreatorBackdropClick(event)"
+  >
+    <div class="creator-wall-modal" onclick="event.stopPropagation()">
+      <button 
+        class="creator-close-btn" 
+        id="creatorWallCloseBtn"
+        onclick="closeCreatorWall()" 
+        aria-label="Close Creator Wall"
+        title="Close (Esc)"
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="creator-avatar-container">
+        <img 
+          class="creator-avatar-img" 
+          src="https://res.cloudinary.com/prjgzqvy/image/upload/v1786899509/image_1776070140355_zjbr8s.jpg" 
+          alt="Athir Hussain Bhat"
+          onerror="handleCreatorImgError(this)"
+        />
+      </div>
+
+      <h2 class="creator-name" id="creatorWallTitle">ATHIR HUSSAIN BHAT</h2>
+      <div class="creator-role-badge">Creator</div>
+
+      <p class="creator-quote">
+        “Built with curiosity.<br>Designed with purpose.”
+      </p>
+
+      <div class="creator-divider"></div>
+
+      <div class="creator-links-grid">
+        <a href="https://youtube.com/@aathir_hussain_bhat.?si=3XMwPJfQZ4JHKisR" target="_blank" rel="noopener noreferrer" class="creator-link-card">
+          <div class="creator-link-left">
+            <svg class="creator-link-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+            <span>YouTube</span>
+          </div>
+          <svg class="creator-link-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </a>
+
+        <a href="https://www.instagram.com/bhat_boyka/" target="_blank" rel="noopener noreferrer" class="creator-link-card">
+          <div class="creator-link-left">
+            <svg class="creator-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
+            <span>Instagram</span>
+          </div>
+          <svg class="creator-link-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </a>
+
+        <a href="https://www.facebook.com/AathirHussainBhat/" target="_blank" rel="noopener noreferrer" class="creator-link-card">
+          <div class="creator-link-left">
+            <svg class="creator-link-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+            <span>Facebook</span>
+          </div>
+          <svg class="creator-link-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </a>
+
+        <a href="https://github.com/Aathir-Hussain-Bhat" target="_blank" rel="noopener noreferrer" class="creator-link-card">
+          <div class="creator-link-left">
+            <svg class="creator-link-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+            </svg>
+            <span>GitHub</span>
+          </div>
+          <svg class="creator-link-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </a>
+
+        <a href="https://theresanaiforthat.com/@bhatboyka/" target="_blank" rel="noopener noreferrer" class="creator-link-card">
+          <div class="creator-link-left">
+            <svg class="creator-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="4" width="16" height="16" rx="3"></rect>
+              <rect x="9" y="9" width="6" height="6"></rect>
+              <line x1="9" y1="1" x2="9" y2="4"></line>
+              <line x1="15" y1="1" x2="15" y2="4"></line>
+              <line x1="9" y1="20" x2="9" y2="23"></line>
+              <line x1="15" y1="20" x2="15" y2="23"></line>
+            </svg>
+            <span>TAAFT</span>
+          </div>
+          <svg class="creator-link-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </a>
+
+        <a href="https://www.linkedin.com/in/bhat-boyka-549892414" target="_blank" rel="noopener noreferrer" class="creator-link-card">
+          <div class="creator-link-left">
+            <svg class="creator-link-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.88a1.62 1.62 0 1 0 0 3.24 1.62 1.62 0 0 0 0-3.24z"/>
+            </svg>
+            <span>LinkedIn</span>
+          </div>
+          <svg class="creator-link-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </a>
+
+        <a href="https://aathir-hussain-bhat.github.io/BHAT-NETWORK-/" target="_blank" rel="noopener noreferrer" class="creator-link-card creator-link-network">
+          <div class="creator-link-left">
+            <svg class="creator-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <span>BHAT NETWORK</span>
+          </div>
+          <svg class="creator-link-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       FULLSCREEN BASE PREVIEW OVERLAY
+       ========================================================================== -->
+  <div 
+    id="fullscreenOverlay" 
+    class="fullscreen-overlay" 
+    role="dialog" 
+    aria-modal="true" 
+    aria-label="Fullscreen base preview"
+    onclick="handleOverlayBackdropClick(event)"
+  >
+    <button class="fullscreen-close-btn" onclick="closeFullscreenPreview()" aria-label="Close preview" title="Close preview (Esc)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    <div class="fullscreen-dialog-box" onclick="event.stopPropagation()">
+      <img id="fullscreenImage" class="fullscreen-img" src="" alt="Base layout fullscreen preview">
+      <div id="fullscreenCaption" class="fullscreen-caption"></div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MOBILE BOTTOM NAVIGATION
+       ========================================================================== -->
+  <nav class="bottom-nav-bar" aria-label="Mobile Navigation">
+    <button class="b-nav-item active" data-view="home" onclick="navigateTo('home')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span>Home</span>
+    </button>
+    <button class="b-nav-item" data-view="explore" onclick="navigateTo('explore')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <span>Explore</span>
+    </button>
+    <button class="b-nav-item" data-view="saved" onclick="navigateTo('saved')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+      </svg>
+      <span>Saved</span>
+    </button>
+    <button class="b-nav-item" data-view="submit" onclick="navigateTo('submit')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <span>Create</span>
+    </button>
+    <button class="b-nav-item" data-view="settings" onclick="navigateTo('settings')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <!-- Notification Toast -->
+  <div class="toast-pill" id="globalToast" role="status" aria-live="polite">Base link copied.</div>
+
+  <!-- ==========================================================================
+       APPLICATION SCRIPT
+       ========================================================================== -->
+  <script>
+    // --------------------------------------------------------------------------
+    // 1. SUPABASE CLIENT & AUTH STATE
+    // --------------------------------------------------------------------------
+    const SUPABASE_URL = 'https://netjcizmrwfsurmhykth.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_7ML7aYl3i5uawuvNd6cPtA_UAl3aEpT';
+
+    let supabaseClient = null;
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true
+        }
+      });
+    }
+
+    const CLEAN_FALLBACK_SVG = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="100%" height="100%" fill="%23242A24"/><path d="M0 40h600M0 80h600M0 120h600M0 160h600M0 200h600M0 240h600M0 280h600M0 320h600M0 360h600M40 0v400M80 0v400M120 0v400M160 0v400M200 0v400M240 0v400M280 0v400M320 0v400M360 0v400M400 0v400M440 0v400M480 0v400M520 0v400M560 0v400" stroke="%232D352D" stroke-width="1"/><rect x="210" y="140" width="180" height="120" rx="8" fill="%233E5437" stroke="%2378996F" stroke-width="2"/><circle cx="300" cy="200" r="28" fill="none" stroke="%23E8EFE6" stroke-width="2" stroke-dasharray="4 4"/><text x="300" y="205" fill="%23FFFFFF" font-family="sans-serif" font-size="12" font-weight="700" letter-spacing="2" text-anchor="middle">BASE PREVIEW</text></svg>';
+
+    let currentUser = null;
+    let currentUserProfile = null;
+    let userFollowingsSet = new Set();
+
+    let supabaseBases = [];
+    let isBasesLoading = true;
+    let basesFetchError = null;
+
+    // --------------------------------------------------------------------------
+    // TOAST & NOTIFICATION CONTROLLER (CANONICAL)
+    // --------------------------------------------------------------------------
+    let toastTimeout = null;
+    function notifyToast(text) {
+      const toast = document.getElementById('globalToast');
+      if (!toast) return;
+      toast.textContent = text;
+      toast.classList.add('visible');
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('visible');
+      }, 2200);
+    }
+
+    // --------------------------------------------------------------------------
+    // CLIPBOARD CONTROLLER (CANONICAL)
+    // --------------------------------------------------------------------------
+    function copyToClipboard(text, onSuccess, onError) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(onSuccess).catch(onError);
+      } else {
+        try {
+          const temp = document.createElement('textarea');
+          temp.value = text;
+          document.body.appendChild(temp);
+          temp.select();
+          document.execCommand('copy');
+          document.body.removeChild(temp);
+          if (onSuccess) onSuccess();
+        } catch (err) {
+          if (onError) onError(err);
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // SAFE STORAGE HELPERS
+    // --------------------------------------------------------------------------
+    function safeGetJSON(key, fallback) {
+      try {
+        const val = localStorage.getItem(key);
+        if (!val) return fallback;
+        const parsed = JSON.parse(val);
+        return parsed !== null ? parsed : fallback;
+      } catch (err) {
+        return fallback;
+      }
+    }
+
+    function safeSetJSON(key, data) {
+      try {
+        localStorage.setItem(key, JSON.stringify(data));
+      } catch (err) {
+        console.warn('Storage error', err);
+      }
+    }
+
+    function getSavedList() {
+      const primary = safeGetJSON('baseforge_saved', null);
+      if (Array.isArray(primary)) return Array.from(new Set(primary));
+      return [];
+    }
+
+    function setSavedList(ids) {
+      safeSetJSON('baseforge_saved', Array.from(new Set(ids)));
+    }
+
+    function getRecentlyViewedIds() {
+      const recent = safeGetJSON('baseforge_recent', []);
+      return Array.isArray(recent) ? recent : [];
+    }
+
+    function addRecentlyViewed(baseId) {
+      let list = getRecentlyViewedIds().filter(id => id !== baseId && allLayouts.some(b => b.id === id));
+      list.unshift(baseId);
+      list = list.slice(0, 6);
+      safeSetJSON('baseforge_recent', list);
+    }
+
+    function clearRecentlyViewed() {
+      try { localStorage.removeItem('baseforge_recent'); } catch(e){}
+      renderRecentlyViewed();
+      notifyToast('Recently viewed cleared');
+    }
+
+    // --------------------------------------------------------------------------
+    // BASE UNIFICATION
+    // --------------------------------------------------------------------------
+    function getFullBaseList() {
+      const seenIds = new Set();
+      const unified = [];
+
+      supabaseBases.forEach(item => {
+        if (item && item.id && !seenIds.has(item.id)) {
+          seenIds.add(item.id);
+          unified.push(item);
+        }
+      });
+
+      return unified;
+    }
+
+    let allLayouts = [];
+
+    // --------------------------------------------------------------------------
+    // SUPABASE DATA FETCHING (BASES & PROFILES)
+    // --------------------------------------------------------------------------
+    async function loadBasesFromSupabase() {
+      isBasesLoading = true;
+      basesFetchError = null;
+      renderLoadingSkeletons();
+
+      if (!supabaseClient) {
+        const cached = safeGetJSON('baseforge_cached_bases', []);
+        supabaseBases = cached;
+        isBasesLoading = false;
+        allLayouts = getFullBaseList();
+        refreshCurrentView();
+        return;
+      }
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('bases')
+          .select(`
+            id,
+            name,
+            town_hall,
+            type,
+            description,
+            tags,
+            image,
+            base_link,
+            featured,
+            status,
+            creator_id,
+            created_at,
+            profiles:creator_id (
+              id,
+              username,
+              display_name,
+              avatar_url
+            )
+          `)
+          .order('town_hall', { ascending: false });
+
+        if (error) throw error;
+
+        supabaseBases = (data || []).map(row => {
+          const profile = row.profiles || null;
+          return {
+            id: row.id,
+            name: row.name,
+            townHall: row.town_hall,
+            type: row.type,
+            description: row.description,
+            tags: Array.isArray(row.tags) ? row.tags : [],
+            image: row.image,
+            baseLink: row.base_link,
+            featured: Boolean(row.featured),
+            status: row.status || 'published',
+            creatorId: row.creator_id || null,
+            creatorName: profile ? profile.display_name : 'BaseForge Official',
+            creatorUsername: profile ? profile.username : 'baseforge',
+            creatorAvatar: profile ? profile.avatar_url : 'https://res.cloudinary.com/prjgzqvy/image/upload/v1786899509/image_1776070140355_zjbr8s.jpg',
+            createdAt: row.created_at ? row.created_at.split('T')[0] : ''
+          };
+        });
+
+        safeSetJSON('baseforge_cached_bases', supabaseBases);
+        isBasesLoading = false;
+        allLayouts = getFullBaseList();
+        refreshCurrentView();
+      } catch (err) {
+        console.error('[BaseForge] Supabase fetch error:', err);
+        basesFetchError = err.message || 'Database connection error';
+        isBasesLoading = false;
+
+        const cached = safeGetJSON('baseforge_cached_bases', []);
+        if (cached && cached.length > 0) {
+          supabaseBases = cached;
+          allLayouts = getFullBaseList();
+          refreshCurrentView();
+          notifyToast('Loaded from offline cache');
+        } else {
+          allLayouts = getFullBaseList();
+          renderErrorState(basesFetchError);
+        }
+      }
+    }
+
+    function renderLoadingSkeletons() {
+      const skeletonHTML = `
+        <div class="skeleton-card">
+          <div class="skeleton-img"></div>
+          <div class="skeleton-body">
+            <div class="skeleton-line" style="width: 40%;"></div>
+            <div class="skeleton-line" style="width: 80%; height: 16px;"></div>
+            <div class="skeleton-line" style="width: 60%;"></div>
+            <div class="skeleton-line" style="width: 100%; height: 38px; border-radius: 9999px; margin-top: 8px;"></div>
+          </div>
+        </div>
+      `.repeat(3);
+
+      const featuredContainer = document.getElementById('featuredGridContainer');
+      const exploreContainer = document.getElementById('exploreGridContainer');
+      if (featuredContainer && currentView === 'home') featuredContainer.innerHTML = skeletonHTML;
+      if (exploreContainer && currentView === 'explore') exploreContainer.innerHTML = skeletonHTML;
+    }
+
+    function renderErrorState(errorMessage) {
+      const exploreGrid = document.getElementById('exploreGridContainer');
+      const exploreEmpty = document.getElementById('exploreEmptyState');
+      const exploreError = document.getElementById('exploreErrorState');
+      const errorMsgEl = document.getElementById('exploreErrorMsg');
+
+      if (exploreGrid && exploreError) {
+        exploreGrid.innerHTML = '';
+        if (exploreEmpty) exploreEmpty.style.display = 'none';
+        exploreError.style.display = 'block';
+        if (errorMsgEl) errorMsgEl.textContent = errorMessage || 'Failed to connect to Supabase database.';
+      }
+    }
+
+    function refreshCurrentView() {
+      const exploreError = document.getElementById('exploreErrorState');
+      if (exploreError) exploreError.style.display = 'none';
+
+      if (currentView === 'home') {
+        renderFeatured();
+        renderRecentlyViewed();
+      } else if (currentView === 'explore') {
+        renderExplore();
+      } else if (currentView === 'saved') {
+        renderSaved();
+      } else if (currentView === 'submit') {
+        renderSubmitView();
+      } else if (currentView === 'settings') {
+        renderSettingsView();
+      } else if (currentView === 'detail' && currentSelectedId) {
+        renderDetail(currentSelectedId);
+      } else if (currentView === 'creator-profile' && activeProfileUsername) {
+        renderCreatorProfileView(activeProfileUsername);
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // 2. AUTHENTICATION CONTROLLER
+    // --------------------------------------------------------------------------
+    let currentAuthMode = 'login';
+
+    async function initAuth() {
+      if (!supabaseClient) return;
+
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session && session.user) {
+          currentUser = session.user;
+          await fetchCurrentUserProfile();
+          await fetchUserFollows();
+        }
+      } catch (err) {
+        console.warn('Session retrieval error:', err);
+      }
+
+      renderAuthHeaderState();
+
+      supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (session && session.user) {
+          currentUser = session.user;
+          await fetchCurrentUserProfile();
+          await fetchUserFollows();
+        } else {
+          currentUser = null;
+          currentUserProfile = null;
+          userFollowingsSet.clear();
+        }
+        renderAuthHeaderState();
+        loadBasesFromSupabase();
+      });
+    }
+
+    async function fetchCurrentUserProfile() {
+      if (!currentUser || !supabaseClient) return;
+      try {
+        const { data, error } = await supabaseClient
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUser.id)
+          .maybeSingle();
+
+        if (!error && data) {
+          currentUserProfile = data;
+        } else {
+          const fallbackUsername = (currentUser.email.split('@')[0] + Math.floor(Math.random()*1000)).replace(/[^a-zA-Z0-9_]/g, '');
+          const { data: newProf } = await supabaseClient
+            .from('profiles')
+            .upsert({
+              id: currentUser.id,
+              username: fallbackUsername,
+              display_name: currentUser.email.split('@')[0],
+              avatar_url: ''
+            })
+            .select()
+            .single();
+          if (newProf) currentUserProfile = newProf;
+        }
+      } catch (e) {
+        console.warn('Profile fetch error:', e);
+      }
+    }
+
+    async function fetchUserFollows() {
+      if (!currentUser || !supabaseClient) return;
+      try {
+        const { data, error } = await supabaseClient
+          .from('follows')
+          .select('following_id')
+          .eq('follower_id', currentUser.id);
+
+        if (!error && data) {
+          userFollowingsSet = new Set(data.map(r => r.following_id));
+        }
+      } catch (e) {
+        console.warn('Follows fetch error:', e);
+      }
+    }
+
+    function renderAuthHeaderState() {
+      const slot = document.getElementById('authHeaderSlot');
+      if (!slot) return;
+
+      if (currentUser && currentUserProfile) {
+        const avatarSrc = currentUserProfile.avatar_url || 'https://res.cloudinary.com/prjgzqvy/image/upload/v1786899509/image_1776070140355_zjbr8s.jpg';
+        slot.innerHTML = `
+          <button class="btn-auth-user" onclick="navigateTo('creator-profile', '${currentUserProfile.username}')" title="View your creator profile">
+            <img class="header-user-avatar" src="${avatarSrc}" alt="${currentUserProfile.display_name}">
+            <span>${currentUserProfile.display_name.split(' ')[0]}</span>
+          </button>
+        `;
+      } else {
+        slot.innerHTML = `
+          <button class="btn-auth-trigger" onclick="openAuthModal('login')">
+            <span>Log In</span>
+          </button>
+        `;
+      }
+    }
+
+    function openAuthModal(mode = 'login') {
+      currentAuthMode = mode;
+      switchAuthTab(mode);
+      const overlay = document.getElementById('authModalOverlay');
+      if (overlay) overlay.classList.add('open');
+      const err = document.getElementById('authErrorMsg');
+      if (err) err.style.display = 'none';
+    }
+
+    function closeAuthModal() {
+      const overlay = document.getElementById('authModalOverlay');
+      if (overlay) overlay.classList.remove('open');
+    }
+
+    function handleAuthBackdropClick(e) {
+      if (e.target === document.getElementById('authModalOverlay')) {
+        closeAuthModal();
+      }
+    }
+
+    function switchAuthTab(mode) {
+      currentAuthMode = mode;
+      const tabLogin = document.getElementById('tabBtnLogin');
+      const tabSignup = document.getElementById('tabBtnSignup');
+      const nameField = document.getElementById('authNameField');
+      const title = document.getElementById('authModalTitle');
+      const sub = document.getElementById('authModalSub');
+      const submitBtn = document.getElementById('authSubmitBtn');
+      const err = document.getElementById('authErrorMsg');
+      if (err) err.style.display = 'none';
+
+      if (mode === 'login') {
+        tabLogin.classList.add('active');
+        tabSignup.classList.remove('active');
+        nameField.style.display = 'none';
+        title.textContent = 'Welcome back';
+        sub.textContent = 'Log in to publish and manage defense layouts.';
+        submitBtn.textContent = 'Log In';
+      } else {
+        tabSignup.classList.add('active');
+        tabLogin.classList.remove('active');
+        nameField.style.display = 'block';
+        title.textContent = 'Create an account';
+        sub.textContent = 'Join BaseForge to publish bases and follow creators.';
+        submitBtn.textContent = 'Sign Up';
+      }
+    }
+
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      if (!supabaseClient) {
+        notifyToast('Supabase client is not connected');
+        return;
+      }
+
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+      const displayName = document.getElementById('authDisplayName').value.trim();
+      const errorMsg = document.getElementById('authErrorMsg');
+      const submitBtn = document.getElementById('authSubmitBtn');
+
+      errorMsg.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Please wait...';
+
+      try {
+        if (currentAuthMode === 'signup') {
+          const { error } = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                display_name: displayName || email.split('@')[0]
+              }
+            }
+          });
+          if (error) throw error;
+          notifyToast('Account created successfully');
+          closeAuthModal();
+        } else {
+          const { error } = await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+          });
+          if (error) throw error;
+          notifyToast('Welcome back!');
+          closeAuthModal();
+        }
+      } catch (err) {
+        errorMsg.textContent = err.message || 'Authentication failed. Please check credentials.';
+        errorMsg.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = currentAuthMode === 'login' ? 'Log In' : 'Sign Up';
+      }
+    }
+
+    async function handleAuthSignOut() {
+      if (!supabaseClient) return;
+      await supabaseClient.auth.signOut();
+      notifyToast('Logged out');
+      navigateTo('home');
+    }
+
+    // --------------------------------------------------------------------------
+    // 3. FOLLOW / UNFOLLOW CONTROLLER
+    // --------------------------------------------------------------------------
+    async function toggleFollow(targetUserId) {
+      if (!targetUserId) {
+        notifyToast('Official platform creator cannot be followed.');
+        return;
+      }
+
+      if (!currentUser) {
+        openAuthModal('login');
+        notifyToast('Please log in to follow creators');
+        return;
+      }
+
+      if (currentUser.id === targetUserId) {
+        notifyToast('You cannot follow yourself');
+        return;
+      }
+
+      const isFollowing = userFollowingsSet.has(targetUserId);
+
+      try {
+        if (isFollowing) {
+          const { error } = await supabaseClient
+            .from('follows')
+            .delete()
+            .eq('follower_id', currentUser.id)
+            .eq('following_id', targetUserId);
+
+          if (error) throw error;
+          userFollowingsSet.delete(targetUserId);
+          notifyToast('Unfollowed');
+        } else {
+          const { error } = await supabaseClient
+            .from('follows')
+            .insert({
+              follower_id: currentUser.id,
+              following_id: targetUserId
+            });
+
+          if (error) throw error;
+          userFollowingsSet.add(targetUserId);
+          notifyToast('Following creator');
+        }
+
+        if (currentView === 'detail' && currentSelectedId) renderDetail(currentSelectedId);
+        if (currentView === 'creator-profile' && activeProfileUsername) renderCreatorProfileView(activeProfileUsername);
+      } catch (err) {
+        console.error('Follow toggle error:', err);
+        notifyToast('Unable to complete request');
+      }
+    }
+
+    function handleToggleFollowCreator() {
+      const base = allLayouts.find(b => b.id === currentSelectedId);
+      if (base && base.creatorId) {
+        toggleFollow(base.creatorId);
+      }
+    }
+
+    function handleProfileToggleFollow() {
+      if (!activeProfileUserObj || !activeProfileUserObj.id) return;
+      toggleFollow(activeProfileUserObj.id);
+    }
+
+    // --------------------------------------------------------------------------
+    // 4. CREATOR PROFILE VIEW CONTROLLER
+    // --------------------------------------------------------------------------
+    let activeProfileUsername = null;
+    let activeProfileUserObj = null;
+
+    async function renderCreatorProfileView(username) {
+      activeProfileUsername = username;
+      const avatar = document.getElementById('cpAvatar');
+      const name = document.getElementById('cpDisplayName');
+      const handle = document.getElementById('cpUsername');
+      const bio = document.getElementById('cpBio');
+      const flwCount = document.getElementById('cpFollowersCount');
+      const flgCount = document.getElementById('cpFollowingCount');
+      const bscCount = document.getElementById('cpBasesCount');
+      const followBtn = document.getElementById('cpFollowBtn');
+      const grid = document.getElementById('cpBasesGrid');
+      const empty = document.getElementById('cpEmptyBases');
+
+      grid.innerHTML = '';
+      empty.style.display = 'none';
+
+      if (username === 'baseforge') {
+        avatar.src = 'https://res.cloudinary.com/prjgzqvy/image/upload/v1786899509/image_1776070140355_zjbr8s.jpg';
+        name.textContent = 'BaseForge Official';
+        handle.textContent = '@baseforge';
+        bio.textContent = 'Curated tournament and war layouts engineered by the community.';
+        flwCount.textContent = '—';
+        flgCount.textContent = '—';
+        
+        const officialBases = allLayouts.filter(b => !b.creatorId && b.status === 'published');
+        bscCount.textContent = officialBases.length;
+        followBtn.style.display = 'none';
+
+        if (officialBases.length === 0) {
+          empty.style.display = 'block';
+        } else {
+          grid.innerHTML = officialBases.map(b => createCardMarkup(b)).join('');
+        }
+        return;
+      }
+
+      followBtn.style.display = 'inline-flex';
+
+      try {
+        let profile = null;
+        let followers = 0;
+        let following = 0;
+
+        if (supabaseClient) {
+          const { data: profData, error } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .ilike('username', username)
+            .maybeSingle();
+
+          if (error) throw error;
+          profile = profData;
+          activeProfileUserObj = profile;
+
+          if (profile) {
+            const { count: fCount } = await supabaseClient
+              .from('follows')
+              .select('*', { count: 'exact', head: true })
+              .eq('following_id', profile.id);
+
+            const { count: flgCnt } = await supabaseClient
+              .from('follows')
+              .select('*', { count: 'exact', head: true })
+              .eq('follower_id', profile.id);
+
+            followers = fCount || 0;
+            following = flgCnt || 0;
+          }
+        }
+
+        if (!profile) {
+          name.textContent = 'Creator Not Found';
+          handle.textContent = `@${username}`;
+          bio.textContent = 'This creator profile does not exist.';
+          empty.style.display = 'block';
+          return;
+        }
+
+        avatar.src = profile.avatar_url || CLEAN_FALLBACK_SVG;
+        name.textContent = profile.display_name;
+        handle.textContent = `@${profile.username}`;
+        bio.textContent = profile.bio || 'Clash base architect.';
+        flwCount.textContent = followers;
+        flgCount.textContent = following;
+
+        if (currentUser && currentUser.id === profile.id) {
+          followBtn.style.display = 'none';
+        } else {
+          followBtn.style.display = 'inline-flex';
+          const isFlw = userFollowingsSet.has(profile.id);
+          followBtn.className = `btn-follow ${isFlw ? 'following' : ''}`;
+          followBtn.textContent = isFlw ? 'Following' : 'Follow';
+        }
+
+        const creatorBases = allLayouts.filter(b => b.creatorId === profile.id && b.status === 'published');
+        bscCount.textContent = creatorBases.length;
+
+        if (creatorBases.length === 0) {
+          empty.style.display = 'block';
+        } else {
+          grid.innerHTML = creatorBases.map(b => createCardMarkup(b)).join('');
+        }
+      } catch (err) {
+        console.error('Creator profile load error:', err);
+        notifyToast('Failed to load profile');
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // 5. BASE DETAILS PAGE
+    // --------------------------------------------------------------------------
+    function renderDetail(baseId) {
+      currentSelectedId = baseId;
+      const base = allLayouts.find(b => b.id === baseId);
+      if (!base) {
+        navigateTo('explore');
+        return;
+      }
+
+      addRecentlyViewed(baseId);
+
+      const banner = document.getElementById('deeplinkFallbackBanner');
+      if (banner) banner.style.display = 'none';
+
+      const dImg = document.getElementById('dImage');
+      dImg.onerror = () => { dImg.src = CLEAN_FALLBACK_SVG; };
+      dImg.src = base.image || CLEAN_FALLBACK_SVG;
+
+      const baseName = base.name || "Clash Base";
+      const baseType = (base.type || "War").toUpperCase();
+
+      document.getElementById('dTitle').textContent = baseName;
+      document.getElementById('dMetaBadge').textContent = `TH${base.townHall} \u2022 ${baseType}`;
+      document.getElementById('detailBreadcrumb').textContent = `Explore / TH${base.townHall} / ${base.type || 'War'}`;
+
+      const statusBadge = document.getElementById('dStatusBadge');
+      if (base.status === 'draft') {
+        statusBadge.style.display = 'inline-block';
+      } else {
+        statusBadge.style.display = 'none';
+      }
+
+      document.getElementById('dDesc').textContent = base.description || "Balanced defensive layout configuration.";
+      document.getElementById('dFullDesc').textContent = 
+        base.description || "A tested tactical layout engineered to defend against popular meta attacks with optimized building radii and trap placements.";
+
+      document.getElementById('dInfoTH').textContent = `TH${base.townHall}`;
+      document.getElementById('dInfoType').textContent = base.type || "War";
+      document.getElementById('dInfoPurpose').textContent = 
+        base.type === 'War' ? 'Clan War' :
+        base.type === 'CWL' ? 'Clan War Leagues' :
+        base.type === 'Farming' ? 'Resource Protection' :
+        base.type === 'Trophy' ? 'Trophy Push' : 'Balanced Defense';
+
+      const tags = (base.tags && base.tags.length) ? base.tags : ["Clan War", "Strong Defense"];
+      document.getElementById('dTags').innerHTML = tags.map(t => `<span class="tag-badge">${t}</span>`).join('');
+
+      const heroFrame = document.getElementById('detailHeroContainer');
+      heroFrame.onclick = (e) => {
+        openFullscreenPreview(base.image || CLEAN_FALLBACK_SVG, `${baseName} \u2022 TH${base.townHall}`, e);
+      };
+
+      syncDetailSaveState(getSavedList().includes(base.id));
+
+      const ownerBar = document.getElementById('dOwnerControls');
+      if (currentUser && base.creatorId === currentUser.id) {
+        ownerBar.style.display = 'flex';
+      } else {
+        ownerBar.style.display = 'none';
+      }
+
+      const crAvatar = document.getElementById('baseCreatorAvatar');
+      const crName = document.getElementById('baseCreatorName');
+      const crHandle = document.getElementById('baseCreatorHandle');
+      const crFollowers = document.getElementById('baseCreatorFollowers');
+      const crFollowBtn = document.getElementById('baseCreatorFollowBtn');
+
+      crAvatar.src = base.creatorAvatar || 'https://res.cloudinary.com/prjgzqvy/image/upload/v1786899509/image_1776070140355_zjbr8s.jpg';
+      crName.textContent = base.creatorName;
+      crHandle.textContent = `@${base.creatorUsername}`;
+
+      if (!base.creatorId) {
+        crFollowers.textContent = 'Official Base';
+        crFollowBtn.style.display = 'none';
+      } else {
+        crFollowBtn.style.display = 'inline-flex';
+        const isFollowing = userFollowingsSet.has(base.creatorId);
+        crFollowBtn.className = `btn-follow ${isFollowing ? 'following' : ''}`;
+        crFollowBtn.textContent = isFollowing ? 'Following' : 'Follow';
+
+        if (currentUser && currentUser.id === base.creatorId) {
+          crFollowBtn.style.display = 'none';
+          crFollowers.textContent = 'You are the creator';
+        } else {
+          if (supabaseClient) {
+            supabaseClient
+              .from('follows')
+              .select('*', { count: 'exact', head: true })
+              .eq('following_id', base.creatorId)
+              .then(({ count }) => {
+                crFollowers.textContent = `${count || 0} followers`;
+              });
+          }
+        }
+      }
+
+      const seen = new Set([base.id]);
+      const scoredOthers = [];
+
+      allLayouts.forEach(b => {
+        if (!seen.has(b.id) && b.status === 'published') {
+          seen.add(b.id);
+          let score = 0;
+          if (b.townHall === base.townHall) score += 4;
+          if ((b.type || '').toLowerCase() === (base.type || '').toLowerCase()) score += 3;
+          scoredOthers.push({ base: b, score });
+        }
+      });
+
+      scoredOthers.sort((a, b) => b.score - a.score);
+      const topRelated = scoredOthers.slice(0, 3).map(item => item.base);
+
+      const relContainer = document.getElementById('relatedGridContainer');
+      relContainer.innerHTML = topRelated.map(item => createCardMarkup(item, false)).join('');
+    }
+
+    function handleCreatorCardClick() {
+      const base = allLayouts.find(b => b.id === currentSelectedId);
+      if (base) {
+        navigateTo('creator-profile', base.creatorUsername);
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // 6. CREATE / EDIT / DELETE BASES
+    // --------------------------------------------------------------------------
+    function renderSubmitView() {
+      const authWarning = document.getElementById('formAuthWarning');
+      const submitBtn = document.getElementById('subSubmitBtn');
+      const userBasesContainer = document.getElementById('userBasesList');
+
+      if (!currentUser) {
+        authWarning.style.display = 'block';
+        submitBtn.textContent = 'Log In to Create Base';
+      } else {
+        authWarning.style.display = 'none';
+        submitBtn.textContent = 'Save & Publish';
+      }
+
+      if (!userBasesContainer) return;
+
+      if (!currentUser) {
+        userBasesContainer.innerHTML = `<p style="font-size: 0.84rem; color: var(--text-muted);">Please log in to manage your bases.</p>`;
+        return;
+      }
+
+      const myBases = allLayouts.filter(b => b.creatorId === currentUser.id);
+
+      if (myBases.length === 0) {
+        userBasesContainer.innerHTML = `<p style="font-size: 0.84rem; color: var(--text-muted);">You have not created any bases yet.</p>`;
+        return;
+      }
+
+      userBasesContainer.innerHTML = myBases.map(b => `
+        <div class="sub-item-card">
+          <img class="sub-item-thumb" src="${b.image || CLEAN_FALLBACK_SVG}" alt="${b.name}" onerror="this.src=CLEAN_FALLBACK_SVG">
+          <div class="sub-item-info">
+            <div class="sub-item-title">${b.name}</div>
+            <div class="sub-item-meta">
+              <span class="status-badge-chip ${b.status === 'published' ? 'status-published' : 'status-draft'}">${b.status}</span>
+              <span>TH${b.townHall} &bull; ${b.type}</span>
+            </div>
+          </div>
+          <button class="btn-sub-action" onclick="openEditBase('${b.id}')" title="Edit base">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+            </svg>
+          </button>
+          <button class="btn-sub-action btn-sub-delete" onclick="deleteExistingBase('${b.id}')" title="Delete base">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function openEditBase(baseId) {
+      const base = allLayouts.find(b => b.id === baseId);
+      if (!base) return;
+
+      if (!currentUser || base.creatorId !== currentUser.id) {
+        notifyToast('You cannot edit bases you do not own');
+        return;
+      }
+
+      navigateTo('submit');
+
+      document.getElementById('formPageEyebrow').textContent = 'Modify Layout';
+      document.getElementById('formPageTitle').textContent = 'Edit base.';
+      document.getElementById('subEditId').value = base.id;
+      document.getElementById('subName').value = base.name;
+      document.getElementById('subTH').value = base.townHall;
+      document.getElementById('subPurpose').value = base.type;
+      document.getElementById('subLink').value = base.baseLink;
+      document.getElementById('subDesc').value = base.description || '';
+      document.getElementById('subTags').value = (base.tags || []).join(', ');
+      document.getElementById('subImg').value = base.image;
+      document.getElementById('subStatus').value = base.status || 'published';
+
+      document.getElementById('subSubmitBtn').textContent = 'Update Base';
+      document.getElementById('subCancelEditBtn').style.display = 'inline-block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelBaseEdit() {
+      document.getElementById('baseSubmitForm').reset();
+      document.getElementById('subEditId').value = '';
+      document.getElementById('formPageEyebrow').textContent = 'Create';
+      document.getElementById('formPageTitle').textContent = 'Publish a base.';
+      document.getElementById('subSubmitBtn').textContent = 'Save & Publish';
+      document.getElementById('subCancelEditBtn').style.display = 'none';
+    }
+
+    async function deleteExistingBase(baseId) {
+      const base = allLayouts.find(b => b.id === baseId);
+      if (!base) return;
+
+      if (!currentUser || base.creatorId !== currentUser.id) {
+        notifyToast('You can only delete bases you own');
+        return;
+      }
+
+      if (!confirm(`Are you sure you want to permanently delete "${base.name}"?`)) {
+        return;
+      }
+
+      try {
+        const { error } = await supabaseClient
+          .from('bases')
+          .delete()
+          .eq('id', baseId)
+          .eq('creator_id', currentUser.id);
+
+        if (error) throw error;
+
+        notifyToast('Base deleted successfully');
+        await loadBasesFromSupabase();
+        if (currentView === 'detail') navigateTo('explore');
+      } catch (err) {
+        console.error('Delete error:', err);
+        notifyToast('Failed to delete base');
+      }
+    }
+
+    async function handleFormSubmission(e) {
+      e.preventDefault();
+
+      if (!currentUser) {
+        openAuthModal('login');
+        notifyToast('Please log in first');
+        return;
+      }
+
+      const editId = document.getElementById('subEditId').value;
+      const name = document.getElementById('subName').value.trim();
+      const townHall = Number(document.getElementById('subTH').value);
+      const type = document.getElementById('subPurpose').value;
+      const description = document.getElementById('subDesc').value.trim();
+      const baseLink = document.getElementById('subLink').value.trim();
+      const image = document.getElementById('subImg').value.trim();
+      const status = document.getElementById('subStatus').value;
+      
+      let isValid = true;
+      const fieldName = document.getElementById('field-name');
+      if (name.length < 3 || name.length > 60) {
+        fieldName.classList.add('has-error');
+        isValid = false;
+      } else {
+        fieldName.classList.remove('has-error');
+      }
+
+      const fieldLink = document.getElementById('field-link');
+      if (!baseLink || !/^https?:\/\//i.test(baseLink)) {
+        fieldLink.classList.add('has-error');
+        isValid = false;
+      } else {
+        fieldLink.classList.remove('has-error');
+      }
+
+      const fieldImg = document.getElementById('field-img');
+      if (!image || !/^https?:\/\//i.test(image)) {
+        fieldImg.classList.add('has-error');
+        isValid = false;
+      } else {
+        fieldImg.classList.remove('has-error');
+      }
+
+      if (!isValid) return;
+
+      let rawTags = document.getElementById('subTags').value.split(',').map(t => t.trim()).filter(Boolean);
+      if (rawTags.length === 0) rawTags = [type, `TH${townHall}`, "Strong Defense"];
+
+      const submitBtn = document.getElementById('subSubmitBtn');
+      submitBtn.disabled = true;
+
+      try {
+        if (editId) {
+          const { error } = await supabaseClient
+            .from('bases')
+            .update({
+              name,
+              town_hall: townHall,
+              type,
+              description,
+              tags: rawTags.slice(0, 5),
+              image,
+              base_link: baseLink,
+              status
+            })
+            .eq('id', editId)
+            .eq('creator_id', currentUser.id);
+
+          if (error) throw error;
+          notifyToast('Base updated successfully');
+          cancelBaseEdit();
+        } else {
+          const uniqueId = `base-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+          const { error } = await supabaseClient
+            .from('bases')
+            .insert({
+              id: uniqueId,
+              name,
+              town_hall: townHall,
+              type,
+              description,
+              tags: rawTags.slice(0, 5),
+              image,
+              base_link: baseLink,
+              status,
+              creator_id: currentUser.id,
+              featured: false
+            });
+
+          if (error) throw error;
+          notifyToast(status === 'published' ? 'Base published successfully' : 'Draft saved');
+          document.getElementById('baseSubmitForm').reset();
+        }
+
+        await loadBasesFromSupabase();
+        renderSubmitView();
+      } catch (err) {
+        console.error('Submission error:', err);
+        notifyToast(err.message || 'Failed to save base');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // 7. PROFILE SETTINGS UPDATE
+    // --------------------------------------------------------------------------
+    async function saveProfileChanges() {
+      if (!currentUser || !supabaseClient) return;
+
+      const displayName = document.getElementById('setDisplayName').value.trim();
+      const username = document.getElementById('setUsername').value.trim().toLowerCase();
+      const avatarUrl = document.getElementById('setAvatarUrl').value.trim();
+      const bio = document.getElementById('setBio').value.trim();
+
+      try {
+        const { error } = await supabaseClient
+          .from('profiles')
+          .update({
+            display_name: displayName,
+            username,
+            avatar_url: avatarUrl,
+            bio
+          })
+          .eq('id', currentUser.id);
+
+        if (error) throw error;
+        await fetchCurrentUserProfile();
+        renderAuthHeaderState();
+        notifyToast('Profile updated');
+      } catch (err) {
+        notifyToast(err.message || 'Error updating profile');
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // 8. BASE CARD BUILDER
+    // --------------------------------------------------------------------------
+    function createCardMarkup(item, isEager = false) {
+      const isSaved = getSavedList().includes(item.id);
+      const safeTitle = (item.name || "Clash Base").replace(/'/g, "\\'");
+      const baseType = (item.type || "War").toUpperCase();
+
+      const tags = item.tags || [];
+      let tagsMarkup = '';
+      if (tags.length <= 3) {
+        tagsMarkup = tags.map(t => `<span class="tag-badge">${t}</span>`).join('');
+      } else {
+        const visible = tags.slice(0, 3);
+        const remaining = tags.length - 3;
+        tagsMarkup = visible.map(t => `<span class="tag-badge">${t}</span>`).join('') +
+                     `<span class="tag-badge tag-badge-more">+${remaining} more</span>`;
+      }
+
+      return `
+        <div class="base-card" data-id="${item.id}">
+          <div 
+            class="card-figure" 
+            onclick="openFullscreenPreview('${item.image || CLEAN_FALLBACK_SVG}', '${safeTitle} &bull; TH${item.townHall}', event)"
+            title="Click to expand fullscreen"
+          >
+            <img class="card-image" src="${item.image || CLEAN_FALLBACK_SVG}" alt="${item.name} layout preview" ${isEager ? '' : 'loading="lazy"'} onerror="this.onerror=null;this.src='${CLEAN_FALLBACK_SVG}'">
+            <span class="card-meta-pill">TH${item.townHall} &bull; ${baseType}</span>
+            ${item.status === 'draft' ? '<span class="card-status-pill">DRAFT</span>' : ''}
+            
+            <div class="expand-cue">
+              <span class="expand-cue-pill">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <polyline points="9 21 3 21 3 15"></polyline>
+                  <line x1="21" y1="3" x2="14" y2="10"></line>
+                  <line x1="3" y1="21" x2="10" y2="14"></line>
+                </svg>
+                View larger
+              </span>
+            </div>
+
+            <button 
+              class="card-save-icon ${isSaved ? 'saved' : ''}" 
+              onclick="handleSaveToggle('${item.id}', event)" 
+              aria-label="${isSaved ? 'Remove from saved' : 'Save base'}"
+              title="${isSaved ? 'Remove from saved' : 'Save base'}"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="card-content" onclick="navigateTo('detail', '${item.id}')">
+            <div class="card-meta-line">
+              <span class="type-badge">${baseType}</span>
+              <span class="card-author-text">${item.creatorName}</span>
+            </div>
+            <h3 class="card-title" title="${item.name}">${item.name}</h3>
+            <p class="card-short-desc">${item.description || 'Defensive base layout.'}</p>
+            <div class="card-tags">${tagsMarkup}</div>
+            <button 
+              class="btn-card-copy" 
+              onclick="handleCardCopyBase('${item.id}', this, event)"
+              title="Copy Base into Clash of Clans"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>COPY BASE</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // --------------------------------------------------------------------------
+    // 9. STANDARD RENDERERS & FILTERS
+    // --------------------------------------------------------------------------
+    function renderFeatured() {
+      const container = document.getElementById('featuredGridContainer');
+      if (!container) return;
+      
+      if (isBasesLoading && supabaseBases.length === 0) {
+        renderLoadingSkeletons();
+        return;
+      }
+
+      const seen = new Set();
+      const featured = [];
+      allLayouts.forEach(b => {
+        if (b.featured && b.status === 'published' && !seen.has(b.id)) {
+          seen.add(b.id);
+          featured.push(b);
+        }
+      });
+
+      const list = featured.slice(0, 3);
+      container.innerHTML = list.map(item => createCardMarkup(item, true)).join('');
+    }
+
+    function renderRecentlyViewed() {
+      const wrapper = document.getElementById('recentSectionWrapper');
+      const container = document.getElementById('recentGridContainer');
+      if (!wrapper || !container) return;
+
+      const recentIds = getRecentlyViewedIds();
+      const seen = new Set();
+      const recentBases = [];
+
+      recentIds.forEach(id => {
+        if (!seen.has(id)) {
+          const found = allLayouts.find(b => b.id === id);
+          if (found) {
+            seen.add(id);
+            recentBases.push(found);
+          }
+        }
+      });
+
+      if (recentBases.length === 0) {
+        wrapper.style.display = 'none';
+        container.innerHTML = '';
+      } else {
+        wrapper.style.display = 'block';
+        container.innerHTML = recentBases.map(item => createCardMarkup(item, false)).join('');
+      }
+    }
+
+    let selectedCategory = 'All';
+    let selectedTH = 'All';
+    let queryText = '';
+    let currentSort = 'featured';
+    let exploreSavedScrollY = 0;
+
+    function renderExplore() {
+      const container = document.getElementById('exploreGridContainer');
+      const emptyState = document.getElementById('exploreEmptyState');
+      const errorState = document.getElementById('exploreErrorState');
+      const countLabel = document.getElementById('exploreResultsCount');
+      const clearBtn = document.getElementById('btnClearFilters');
+      const searchInput = document.getElementById('exploreSearchField');
+      const sortDropdown = document.getElementById('sortSelect');
+      if (!container) return;
+
+      if (isBasesLoading && supabaseBases.length === 0) {
+        renderLoadingSkeletons();
+        return;
+      }
+
+      if (errorState) errorState.style.display = 'none';
+
+      if (searchInput && searchInput.value !== queryText) searchInput.value = queryText;
+      if (sortDropdown && sortDropdown.value !== currentSort) sortDropdown.value = currentSort;
+
+      document.querySelectorAll('#categoryChipTrack .category-chip').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.val === selectedCategory);
+      });
+      document.querySelectorAll('#thChipTrack .th-chip').forEach(btn => {
+        btn.classList.toggle('active', String(btn.dataset.val) === String(selectedTH));
+      });
+
+      const isFilterActive = (selectedCategory !== 'All') || (selectedTH !== 'All') || (queryText.trim() !== '') || (currentSort !== 'featured');
+      if (clearBtn) clearBtn.style.display = isFilterActive ? 'inline-flex' : 'none';
+
+      const tokens = queryText.toLowerCase().trim().split(/\s+/).filter(Boolean);
+      const seen = new Set();
+
+      let filtered = allLayouts.filter(base => {
+        if (base.status !== 'published') return false;
+        if (seen.has(base.id)) return false;
+
+        const matchesTH = (selectedTH === 'All') || (Number(base.townHall) === Number(selectedTH));
+        const baseType = (base.type || '').toLowerCase();
+        const matchesCat = (selectedCategory === 'All') || (baseType === selectedCategory.toLowerCase());
+
+        if (!matchesTH || !matchesCat) return false;
+
+        if (tokens.length > 0) {
+          const thStr = `th${base.townHall}`.toLowerCase();
+          const thNum = String(base.townHall);
+          const tagsStr = (base.tags || []).join(' ').toLowerCase();
+
+          const matchesTokens = tokens.every(token => {
+            return (base.name || '').toLowerCase().includes(token) ||
+                   (base.description || '').toLowerCase().includes(token) ||
+                   baseType.includes(token) ||
+                   tagsStr.includes(token) ||
+                   thStr === token ||
+                   thNum === token ||
+                   thStr.includes(token);
+          });
+          if (!matchesTokens) return false;
+        }
+
+        seen.add(base.id);
+        return true;
+      });
+
+      if (currentSort === 'az') {
+        filtered.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
+      } else if (currentSort === 'newest') {
+        filtered.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+      }
+
+      countLabel.textContent = `${filtered.length} ${filtered.length === 1 ? 'base' : 'bases'}`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = '';
+        if (emptyState) emptyState.style.display = 'block';
+      } else {
+        if (emptyState) emptyState.style.display = 'none';
+        container.innerHTML = filtered.map(item => createCardMarkup(item, false)).join('');
+      }
+    }
+
+    function handleSortChange(val) { currentSort = val; renderExplore(); }
+    function setCategoryFilter(cat) { selectedCategory = cat; renderExplore(); }
+    function setTownHallFilter(th) { selectedTH = th; renderExplore(); }
+    function handleExploreSearch(val) { queryText = val; renderExplore(); }
+    function handleHeroSearchTrigger(val) { queryText = val; navigateTo('explore'); }
+    function quickFilterTH(th) { selectedTH = th; navigateTo('explore'); }
+
+    function resetAllFilters() {
+      selectedCategory = 'All';
+      selectedTH = 'All';
+      queryText = '';
+      currentSort = 'featured';
+      const searchInput = document.getElementById('exploreSearchField');
+      if (searchInput) searchInput.value = '';
+      const sortDropdown = document.getElementById('sortSelect');
+      if (sortDropdown) sortDropdown.value = 'featured';
+      renderExplore();
+    }
+
+    function renderSaved() {
+      const container = document.getElementById('savedGridContainer');
+      const empty = document.getElementById('savedEmptyState');
+      const savedIds = getSavedList();
+
+      const seen = new Set();
+      const savedItems = [];
+      savedIds.forEach(id => {
+        if (!seen.has(id)) {
+          const found = allLayouts.find(b => b.id === id);
+          if (found) {
+            seen.add(id);
+            savedItems.push(found);
+          }
+        }
+      });
+
+      if (savedItems.length === 0) {
+        container.innerHTML = '';
+        empty.style.display = 'block';
+      } else {
+        empty.style.display = 'none';
+        container.innerHTML = savedItems.map(item => createCardMarkup(item, false)).join('');
+      }
+    }
+
+    function handleSaveToggle(baseId, e = null) {
+      if (e) e.stopPropagation();
+      let list = getSavedList();
+      let nowSaved = false;
+
+      if (list.includes(baseId)) {
+        list = list.filter(id => id !== baseId);
+        notifyToast('Removed from saved');
+      } else {
+        list.push(baseId);
+        nowSaved = true;
+        notifyToast('Base saved');
+      }
+
+      setSavedList(list);
+
+      if (currentView === 'home') { renderFeatured(); renderRecentlyViewed(); }
+      if (currentView === 'explore') renderExplore();
+      if (currentView === 'saved') renderSaved();
+      if (currentView === 'detail' && currentSelectedId === baseId) syncDetailSaveState(nowSaved);
+    }
+
+    function handleDetailSaveToggle() {
+      if (currentSelectedId) handleSaveToggle(currentSelectedId);
+    }
+
+    function syncDetailSaveState(isSaved) {
+      const saveBtn = document.getElementById('dSaveBtn');
+      const saveText = document.getElementById('dSaveText');
+      const saveIcon = document.getElementById('dSaveIcon');
+      if (!saveBtn) return;
+
+      if (isSaved) {
+        saveBtn.classList.add('saved');
+        saveText.textContent = 'SAVED';
+        saveIcon.setAttribute('fill', 'currentColor');
+      } else {
+        saveBtn.classList.remove('saved');
+        saveText.textContent = 'SAVE';
+        saveIcon.setAttribute('fill', 'none');
+      }
+    }
+
+    function handleDetailShare() {
+      const base = allLayouts.find(b => b.id === currentSelectedId);
+      if (!base) return;
+
+      const shareData = {
+        title: base.name || "Clash Base",
+        text: `${base.name || "Clash Base"} (TH${base.townHall} ${base.type || 'War'}) on BASEFORGE`,
+        url: window.location.href
+      };
+
+      if (navigator.share) {
+        navigator.share(shareData).catch(() => {});
+      } else {
+        copyToClipboard(window.location.href, () => {
+          notifyToast('Link copied');
+        }, () => {
+          notifyToast('Unable to share link');
+        });
+      }
+    }
+
+    function handleCardCopyBase(baseId, btnElement, e) {
+      if (e) e.stopPropagation();
+      const base = allLayouts.find(b => b.id === baseId);
+      if (!base) return;
+      triggerClashDeepLink(base, btnElement);
+    }
+
+    function handleDetailCopyAction() {
+      const base = allLayouts.find(b => b.id === currentSelectedId);
+      if (!base) return;
+      triggerClashDeepLink(base, document.getElementById('dCopyBtn'));
+    }
+
+    function triggerClashDeepLink(base, btnElement = null) {
+      if (!base.baseLink || !/^https?:\/\//i.test(base.baseLink)) {
+        notifyToast('Base link unavailable');
+        return;
+      }
+
+      if (btnElement) {
+        const span = btnElement.querySelector('span');
+        const originalText = span ? span.textContent : btnElement.textContent;
+        btnElement.classList.add('is-opening');
+        if (span) span.textContent = 'OPENING CLASH...';
+
+        setTimeout(() => {
+          btnElement.classList.remove('is-opening');
+          if (span) span.textContent = originalText;
+        }, 1800);
+      }
+
+      try { window.location.href = base.baseLink; } catch (err) {}
+
+      setTimeout(() => {
+        const banner = document.getElementById('deeplinkFallbackBanner');
+        if (banner) {
+          banner.style.display = 'flex';
+          banner.dataset.link = base.baseLink;
+        }
+      }, 1000);
+    }
+
+    function handleFallbackCopyLink() {
+      const banner = document.getElementById('deeplinkFallbackBanner');
+      const copyBtn = document.getElementById('fallbackCopyBtn');
+      const link = banner ? banner.dataset.link : '';
+
+      if (!link) return;
+
+      copyToClipboard(link, () => {
+        copyBtn.classList.add('copied');
+        copyBtn.textContent = 'LINK COPIED';
+        notifyToast('Link copied');
+        setTimeout(() => {
+          copyBtn.classList.remove('copied');
+          copyBtn.textContent = 'COPY LINK';
+        }, 2200);
+      }, () => {
+        notifyToast('Unable to copy link');
+      });
+    }
+
+    // --------------------------------------------------------------------------
+    // 10. NAVIGATION & MODALS
+    // --------------------------------------------------------------------------
+    let currentView = 'home';
+    let previousView = 'home';
+    let currentSelectedId = null;
+    let isFullscreenOpen = false;
+    let isCreatorWallOpen = false;
+    let creatorWallTriggerEl = null;
+
+    function navigateTo(targetView, param = null) {
+      if (isFullscreenOpen) closeFullscreenPreview();
+      if (isCreatorWallOpen) closeCreatorWall();
+      closeAuthModal();
+
+      if (currentView === 'explore' && targetView === 'detail') {
+        exploreSavedScrollY = window.scrollY;
+      }
+
+      if (targetView === 'detail' && param) {
+        window.location.hash = `detail-${param}`;
+      } else if (targetView === 'creator-profile' && param) {
+        window.location.hash = `creator-${param}`;
+      } else {
+        previousView = targetView;
+        if (window.location.hash !== `#${targetView}`) {
+          window.location.hash = targetView;
+        }
+      }
+
+      currentView = targetView;
+
+      document.querySelectorAll('.nav-tabs .nav-link').forEach(link => {
+        link.classList.toggle('active', link.dataset.view === targetView);
+      });
+
+      document.querySelectorAll('.bottom-nav-bar .b-nav-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.view === targetView);
+      });
+
+      document.querySelectorAll('.view').forEach(viewElem => {
+        viewElem.classList.remove('active-view');
+      });
+
+      const activeViewElem = document.getElementById(`view-${targetView}`);
+      if (activeViewElem) activeViewElem.classList.add('active-view');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (targetView === 'home') {
+        renderFeatured();
+        renderRecentlyViewed();
+      } else if (targetView === 'explore') {
+        renderExplore();
+        if (exploreSavedScrollY > 0) {
+          window.scrollTo({ top: exploreSavedScrollY, behavior: 'instant' });
+        }
+      } else if (targetView === 'saved') {
+        renderSaved();
+      } else if (targetView === 'submit') {
+        renderSubmitView();
+      } else if (targetView === 'settings') {
+        renderSettingsView();
+      } else if (targetView === 'detail' && param) {
+        renderDetail(param);
+      } else if (targetView === 'creator-profile' && param) {
+        renderCreatorProfileView(param);
+      }
+    }
+
+    function navigateBack() {
+      navigateTo(previousView || 'explore');
+    }
+
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash.startsWith('detail-')) {
+        const id = hash.replace('detail-', '');
+        navigateTo('detail', id);
+      } else if (hash.startsWith('creator-')) {
+        const username = hash.replace('creator-', '');
+        navigateTo('creator-profile', username);
+      } else if (['home', 'explore', 'saved', 'submit', 'settings'].includes(hash) && currentView !== hash) {
+        navigateTo(hash);
+      }
+    });
+
+    // --------------------------------------------------------------------------
+    // 11. CREATOR WALL CONTROLLER
+    // --------------------------------------------------------------------------
+    function openCreatorWall() {
+      creatorWallTriggerEl = document.getElementById('creatorWallTriggerBtn') || document.activeElement;
+      const overlay = document.getElementById('creatorWallOverlay');
+      if (!overlay) return;
+
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      isCreatorWallOpen = true;
+
+      const closeBtn = document.getElementById('creatorWallCloseBtn');
+      if (closeBtn) closeBtn.focus();
+    }
+
+    function closeCreatorWall() {
+      const overlay = document.getElementById('creatorWallOverlay');
+      if (!overlay) return;
+
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      isCreatorWallOpen = false;
+
+      if (creatorWallTriggerEl && typeof creatorWallTriggerEl.focus === 'function') {
+        creatorWallTriggerEl.focus();
+      }
+    }
+
+    function handleCreatorBackdropClick(e) {
+      if (e.target === document.getElementById('creatorWallOverlay')) {
+        closeCreatorWall();
+      }
+    }
+
+    function handleCreatorImgError(img) {
+      img.onerror = null;
+      img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100%" height="100%" fill="%233E5437"/><circle cx="50" cy="40" r="18" fill="%23E8EFE6"/><path d="M22 84c0-15.5 12.5-28 28-28s28 12.5 28 28" fill="%23E8EFE6"/></svg>';
+    }
+
+    // --------------------------------------------------------------------------
+    // 12. FULLSCREEN PREVIEW CONTROLLER
+    // --------------------------------------------------------------------------
+    function openFullscreenPreview(imageUrl, captionText = '', e = null) {
+      if (e) e.stopPropagation();
+
+      const overlay = document.getElementById('fullscreenOverlay');
+      const img = document.getElementById('fullscreenImage');
+      const caption = document.getElementById('fullscreenCaption');
+
+      img.onerror = () => { img.src = CLEAN_FALLBACK_SVG; };
+      img.src = imageUrl || CLEAN_FALLBACK_SVG;
+      caption.textContent = captionText;
+
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      isFullscreenOpen = true;
+    }
+
+    function closeFullscreenPreview() {
+      const overlay = document.getElementById('fullscreenOverlay');
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      isFullscreenOpen = false;
+    }
+
+    function handleOverlayBackdropClick(e) {
+      if (e.target === document.getElementById('fullscreenOverlay')) {
+        closeFullscreenPreview();
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (isCreatorWallOpen) {
+          closeCreatorWall();
+        } else if (isFullscreenOpen) {
+          closeFullscreenPreview();
+        } else if (document.getElementById('authModalOverlay') && document.getElementById('authModalOverlay').classList.contains('open')) {
+          closeAuthModal();
+        }
+      }
+    });
+
+    // --------------------------------------------------------------------------
+    // 13. SETTINGS VIEW LOGIC
+    // --------------------------------------------------------------------------
+    function renderSettingsView() {
+      const themePref = safeGetJSON('baseforge_theme', 'system');
+      document.querySelectorAll('#themeSegmentCtrl .settings-segment-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.themeVal === themePref);
+      });
+
+      const viewPref = safeGetJSON('baseforge_view', 'grid');
+      document.querySelectorAll('#viewSegmentCtrl .settings-segment-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.viewVal === viewPref);
+      });
+
+      const motionPref = safeGetJSON('baseforge_reduce_motion', 'false') === 'true';
+      document.querySelectorAll('#motionSegmentCtrl .settings-segment-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.motionVal === String(motionPref));
+      });
+
+      document.getElementById('statSavedCount').textContent = getSavedList().length;
+      document.getElementById('statBasesCount').textContent = allLayouts.length;
+      document.getElementById('statMyBasesCount').textContent = currentUser 
+        ? allLayouts.filter(b => b.creatorId === currentUser.id).length 
+        : 0;
+
+      const profilePanel = document.getElementById('settingsProfilePanel');
+      if (currentUser && currentUserProfile) {
+        profilePanel.style.display = 'block';
+        document.getElementById('setDisplayName').value = currentUserProfile.display_name || '';
+        document.getElementById('setUsername').value = currentUserProfile.username || '';
+        document.getElementById('setAvatarUrl').value = currentUserProfile.avatar_url || '';
+        document.getElementById('setBio').value = currentUserProfile.bio || '';
+      } else {
+        profilePanel.style.display = 'none';
+      }
+    }
+
+    function setThemePreference(mode) {
+      safeSetJSON('baseforge_theme', mode);
+      applyTheme(mode);
+      renderSettingsView();
+    }
+
+    function setViewModePreference(mode) {
+      safeSetJSON('baseforge_view', mode);
+      document.documentElement.setAttribute('data-view-mode', mode);
+      renderSettingsView();
+    }
+
+    function setMotionPreference(reduce) {
+      safeSetJSON('baseforge_reduce_motion', String(reduce));
+      document.documentElement.setAttribute('data-reduce-motion', String(reduce));
+      renderSettingsView();
+    }
+
+    function exportAppData() {
+      const data = {
+        version: "2.1.0",
+        exportDate: new Date().toISOString(),
+        saved: getSavedList(),
+        recent: getRecentlyViewedIds(),
+        preferences: {
+          theme: safeGetJSON('baseforge_theme', 'system'),
+          view: safeGetJSON('baseforge_view', 'grid'),
+          reduceMotion: safeGetJSON('baseforge_reduce_motion', 'false') === 'true'
+        }
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `baseforge-backup-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      notifyToast('Data export initiated');
+    }
+
+    function clearAllLocalData() {
+      if (!confirm('Are you sure? This will clear locally cached data, bookmarks, and UI preferences.')) {
+        return;
+      }
+
+      try {
+        localStorage.removeItem('baseforge_saved');
+        localStorage.removeItem('baseforge_recent');
+        localStorage.removeItem('baseforge_theme');
+        localStorage.removeItem('baseforge_view');
+        localStorage.removeItem('baseforge_reduce_motion');
+        localStorage.removeItem('baseforge_cached_bases');
+      } catch (err) {
+        console.warn(err);
+      }
+
+      initTheme();
+      notifyToast('Local cache cleared');
+      renderSettingsView();
+      if (currentView === 'saved') renderSaved();
+      if (currentView === 'home') renderRecentlyViewed();
+    }
+
+    // --------------------------------------------------------------------------
+    // 14. THEME CONTROLLER
+    // --------------------------------------------------------------------------
+    function applyTheme(pref) {
+      let resolved = pref;
+      if (pref === 'system' || !pref) {
+        resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', resolved);
+      syncThemeIcon(resolved);
+    }
+
+    function initTheme() {
+      const stored = safeGetJSON('baseforge_theme', 'system');
+      applyTheme(stored);
+
+      const viewPref = safeGetJSON('baseforge_view', 'grid');
+      document.documentElement.setAttribute('data-view-mode', viewPref);
+
+      const motionPref = safeGetJSON('baseforge_reduce_motion', 'false') === 'true';
+      document.documentElement.setAttribute('data-reduce-motion', String(motionPref));
+
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (safeGetJSON('baseforge_theme', 'system') === 'system') {
+          applyTheme('system');
+        }
+      });
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      setThemePreference(next);
+    }
+
+    function syncThemeIcon(resolvedTheme) {
+      const svg = document.getElementById('themeIconSvg');
+      if (!svg) return;
+      if (resolvedTheme === 'dark') {
+        svg.innerHTML = `
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2"></path>
+          <path d="M12 20v2"></path>
+          <path d="m4.93 4.93 1.41 1.41"></path>
+          <path d="m17.66 17.66 1.41 1.41"></path>
+          <path d="M2 12h2"></path>
+          <path d="M20 12h2"></path>
+          <path d="m6.34 17.66-1.41 1.41"></path>
+          <path d="m19.07 4.93-1.41 1.41"></path>
+        `;
+      } else {
+        svg.innerHTML = `<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>`;
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // 15. APP INITIALIZATION
+    // --------------------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', async () => {
+      initTheme();
+
+      const initialHash = window.location.hash.replace('#', '');
+      let pendingDetailId = null;
+      let pendingCreatorUsername = null;
+
+      if (['home', 'explore', 'saved', 'submit', 'settings'].includes(initialHash)) {
+        currentView = initialHash;
+        navigateTo(initialHash);
+      } else if (initialHash.startsWith('detail-')) {
+        currentView = 'detail';
+        pendingDetailId = initialHash.replace('detail-', '');
+        currentSelectedId = pendingDetailId;
+      } else if (initialHash.startsWith('creator-')) {
+        currentView = 'creator-profile';
+        pendingCreatorUsername = initialHash.replace('creator-', '');
+      }
+
+      await initAuth();
+      await loadBasesFromSupabase();
+
+      if (pendingDetailId) {
+        navigateTo('detail', pendingDetailId);
+      } else if (pendingCreatorUsername) {
+        navigateTo('creator-profile', pendingCreatorUsername);
+      }
+    });
+  </script>
+</body>
+</html>

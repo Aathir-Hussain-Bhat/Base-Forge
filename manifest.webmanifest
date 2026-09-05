@@ -1,0 +1,32 @@
+{
+  "name": "Base Forge",
+  "short_name": "Base Forge",
+  "description": "Find, copy, and defend with community Clash of Clans bases.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#141613",
+  "theme_color": "#3E5437",
+  "categories": ["games", "utilities"],
+  "icons": [
+    {
+      "src": "https://res.cloudinary.com/prjgzqvy/image/upload/c_fill,w_192,h_192/v1788604860/grok_1788604728310_kefg92.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "https://res.cloudinary.com/prjgzqvy/image/upload/c_fill,w_512,h_512/v1788604860/grok_1788604728310_kefg92.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "https://res.cloudinary.com/prjgzqvy/image/upload/c_fill,w_512,h_512/v1788604860/grok_1788604728310_kefg92.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    }
+  ]
+}

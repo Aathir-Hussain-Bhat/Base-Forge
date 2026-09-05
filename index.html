@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BASEFORGE — Find. Copy. Defend.</title>
   
+  <!-- PWA & Mobile Capabilities -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#3E5437" id="metaThemeColor">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Base Forge">
+  <link rel="apple-touch-icon" href="https://res.cloudinary.com/prjgzqvy/image/upload/c_fill,w_192,h_192/v1788604860/grok_1788604728310_kefg92.jpg">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -141,7 +150,7 @@
     }
 
     /* ==========================================================================
-       2. HEADER & CONTROLS
+       2. HEADER, PWA INSTALL & CONTROLS
        ========================================================================== */
     .header {
       position: sticky;
@@ -177,6 +186,13 @@
       color: var(--text-main);
       user-select: none;
       white-space: nowrap;
+    }
+
+    .brand-logo-img {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      object-fit: cover;
     }
 
     .brand-dot {
@@ -217,6 +233,28 @@
       display: flex;
       align-items: center;
       gap: 8px;
+    }
+
+    /* PWA Install Button (Header) */
+    .btn-pwa-install {
+      height: 36px;
+      padding: 0 12px;
+      border-radius: var(--radius-pill);
+      display: none; /* Dynamic: visible only when installable & not installed */
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background: var(--accent-soft);
+      color: var(--accent-on-soft);
+      border: 1px solid var(--border-strong);
+      transition: all var(--duration) var(--ease);
+      user-select: none;
+    }
+
+    .btn-pwa-install:hover {
+      background: var(--accent);
+      color: #FFFFFF;
     }
 
     .btn-creator-trigger {
@@ -334,6 +372,22 @@
 
     .bottom-nav-bar {
       display: none !important;
+    }
+
+    /* Offline Banner (Subtle, non-intrusive) */
+    .offline-banner {
+      display: none;
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+      padding: 6px 14px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .offline-banner.active {
+      display: block;
     }
 
     /* ==========================================================================
@@ -1009,6 +1063,7 @@
       align-items: center;
       gap: 8px;
       margin-bottom: 16px;
+      flex-wrap: wrap;
     }
 
     .detail-th-type-badge {
@@ -1020,6 +1075,17 @@
       background: var(--accent-soft);
       color: var(--accent-on-soft);
       text-transform: uppercase;
+    }
+
+    .detail-purpose-badge {
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding: 4px 11px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      border: 1px solid var(--border-strong);
     }
 
     .detail-status-badge {
@@ -1413,30 +1479,171 @@
       letter-spacing: 0.05em;
     }
 
-    /* Live Profile Preview in Settings */
+    /* Live Profile Preview & Upload Controls in Settings */
     .avatar-preview-box {
       display: flex;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 16px;
-      padding: 12px 14px;
+      gap: 16px;
+      margin-bottom: 18px;
+      padding: 14px 16px;
       border-radius: var(--radius-md);
       background: var(--bg-subtle);
       border: 1px solid var(--border);
     }
 
     .avatar-preview-img {
-      width: 52px;
-      height: 52px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       object-fit: cover;
       background: var(--surface);
-      border: 1px solid var(--border-strong);
+      border: 2px solid var(--border-strong);
+      flex-shrink: 0;
     }
 
     .avatar-preview-text {
       font-size: 0.8rem;
       color: var(--text-muted);
+    }
+
+    .avatar-action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    .upload-tab-switch {
+      display: inline-flex;
+      background: var(--bg);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      padding: 2px;
+      gap: 2px;
+      margin-bottom: 8px;
+    }
+
+    .upload-tab-btn {
+      padding: 5px 14px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      border-radius: var(--radius-pill);
+      color: var(--text-muted);
+      transition: all var(--duration) var(--ease);
+    }
+
+    .upload-tab-btn.active {
+      background: var(--surface);
+      color: var(--text-main);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .image-drop-zone {
+      border: 2px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 20px 16px;
+      text-align: center;
+      background: var(--bg);
+      cursor: pointer;
+      transition: all var(--duration) var(--ease);
+    }
+
+    .image-drop-zone:hover {
+      border-color: var(--accent);
+      background: var(--surface);
+    }
+
+    .image-drop-zone-icon {
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .image-drop-zone-text {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .image-drop-zone-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .live-image-preview-card {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      margin-top: 10px;
+      display: none;
+      position: relative;
+    }
+
+    .live-image-preview-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* PWA Settings Banner Card */
+    .pwa-card-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .pwa-card-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .pwa-card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      object-fit: cover;
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* iOS Share Sheet Helper Modal */
+    .ios-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1300;
+      background: rgba(18, 22, 18, 0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .ios-modal-overlay.open {
+      display: flex;
+    }
+
+    .ios-modal-card {
+      position: relative;
+      width: 100%;
+      max-width: 360px;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 28px 22px 24px;
+      text-align: center;
+      box-shadow: var(--shadow-hover);
     }
 
     /* ==========================================================================
@@ -2333,6 +2540,12 @@
         font-size: 0.78rem;
       }
 
+      .btn-pwa-install {
+        height: 34px;
+        padding: 0 10px;
+        font-size: 0.74rem;
+      }
+
       .hero {
         padding: 48px 0 32px;
       }
@@ -2433,13 +2646,18 @@
 </head>
 <body>
 
+  <!-- Offline Status Banner (subtle) -->
+  <div id="offlineBanner" class="offline-banner">
+    Offline mode active &bull; Viewing cached content
+  </div>
+
   <!-- ==========================================================================
        SITE HEADER
        ========================================================================== -->
   <header class="header">
     <div class="container header-inner">
       <div class="brand" onclick="navigateTo('home')">
-        <span class="brand-dot"></span>
+        <img class="brand-logo-img" src="https://res.cloudinary.com/prjgzqvy/image/upload/c_fill,w_192,h_192/v1788604860/grok_1788604728310_kefg92.jpg" alt="Base Forge logo" onerror="this.style.display='none'">
         <span>BASEFORGE</span>
       </div>
 
@@ -2452,6 +2670,22 @@
       </nav>
 
       <div class="header-actions">
+        <!-- PWA Install Button (Header) -->
+        <button 
+          class="btn-pwa-install" 
+          id="headerPwaInstallBtn"
+          onclick="triggerPwaInstall()" 
+          title="Install Base Forge App"
+          aria-label="Install Base Forge App"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Install</span>
+        </button>
+
         <!-- Creator Wall Trigger -->
         <button 
           class="btn-creator-trigger" 
@@ -2658,6 +2892,7 @@
 
         <div class="detail-meta-tags">
           <span class="detail-th-type-badge" id="dMetaBadge">TH17 &bull; WAR</span>
+          <span class="detail-purpose-badge" id="dPurposeBadge" style="display: none;">WAR</span>
           <span class="detail-status-badge" id="dStatusBadge" style="display: none;">DRAFT</span>
         </div>
 
@@ -2749,10 +2984,15 @@
               <div class="detail-info-val" id="dInfoType">War</div>
             </div>
             <div class="detail-info-card">
-              <div class="detail-info-label">Purpose</div>
+              <div class="detail-info-label">Tactical Purpose</div>
               <div class="detail-info-val" id="dInfoPurpose">Clan War</div>
             </div>
           </div>
+        </div>
+
+        <div class="detail-section-block" id="dDefensiveFocusBlock">
+          <h3 class="detail-section-title">DEFENSIVE FOCUS</h3>
+          <p class="detail-body-p" id="dDefensiveFocus">Optimized compartments against high-tier pathing.</p>
         </div>
 
         <div class="detail-section-block">
@@ -2873,6 +3113,29 @@
             </div>
           </div>
 
+          <div class="form-duo">
+            <div class="form-field">
+              <div class="form-caption-row">
+                <label class="form-caption" for="subTacticalPurpose">Tactical Purpose</label>
+              </div>
+              <select id="subTacticalPurpose" class="form-dropdown">
+                <option value="Anti 3-Star" selected>Anti 3-Star (War Standard)</option>
+                <option value="Anti 2-Star">Anti 2-Star (Safe CWL / Trophy)</option>
+                <option value="Trophy Push">Trophy Push / Legend League</option>
+                <option value="Loot Protection">Resource &amp; Dark Elixir Vault</option>
+                <option value="Teaser / Trap Bait">Compartment Teaser &amp; Trap Bait</option>
+                <option value="Funnel Disruptor">Symmetrical Ring / Funnel Disruptor</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <div class="form-caption-row">
+                <label class="form-caption" for="subDefFocus">Defensive Focus</label>
+              </div>
+              <input type="text" id="subDefFocus" class="form-text-input" placeholder="e.g. Anti-Air, Root Rider Bait, Town Hall Island">
+            </div>
+          </div>
+
           <div class="form-field" id="field-link">
             <div class="form-caption-row">
               <label class="form-caption" for="subLink">Base Link *</label>
@@ -2888,21 +3151,46 @@
             <textarea id="subDesc" class="form-textarea-input" rows="3" placeholder="Explain layout compartments, trap baits, or defensive focus..." maxlength="280"></textarea>
           </div>
 
-          <div class="form-duo">
-            <div class="form-field">
-              <div class="form-caption-row">
-                <label class="form-caption" for="subTags">Tags (Comma-separated)</label>
-              </div>
-              <input type="text" id="subTags" class="form-text-input" placeholder="e.g. Anti 3-Star, Clan War, Anti Air">
+          <div class="form-field">
+            <div class="form-caption-row">
+              <label class="form-caption" for="subTags">Tags (Comma-separated)</label>
+            </div>
+            <input type="text" id="subTags" class="form-text-input" placeholder="e.g. Anti 3-Star, Clan War, Anti Air">
+          </div>
+
+          <!-- Base Screenshot: Dual Upload / URL tab -->
+          <div class="form-field" id="field-img">
+            <div class="form-caption-row">
+              <label class="form-caption">Base Screenshot *</label>
             </div>
 
-            <div class="form-field" id="field-img">
-              <div class="form-caption-row">
-                <label class="form-caption" for="subImg">Screenshot URL *</label>
-              </div>
-              <input type="url" id="subImg" class="form-text-input" placeholder="https://images.unsplash.com/..." required>
-              <div class="field-error-msg">Please enter a valid image URL.</div>
+            <div class="upload-tab-switch">
+              <button type="button" class="upload-tab-btn active" id="tabBaseImgUpload" onclick="switchBaseImgMode('upload')">Upload Device Photo</button>
+              <button type="button" class="upload-tab-btn" id="tabBaseImgUrl" onclick="switchBaseImgMode('url')">Image URL</button>
             </div>
+
+            <div id="baseUploadZone" class="image-drop-zone" onclick="document.getElementById('baseFileInput').click()">
+              <input type="file" id="baseFileInput" style="display: none;" accept="image/jpeg,image/png,image/webp" onchange="handleBaseFileChosen(this)">
+              <div class="image-drop-zone-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </div>
+              <div class="image-drop-zone-text" id="baseUploadZoneLabel">Tap to select layout screenshot</div>
+              <div class="image-drop-zone-sub">PNG, JPG, or WebP up to 5 MB</div>
+            </div>
+
+            <div id="baseUrlFieldWrap" style="display: none; margin-top: 8px;">
+              <input type="url" id="subImg" class="form-text-input" placeholder="https://images.unsplash.com/..." oninput="handleBaseUrlInput(this.value)">
+            </div>
+
+            <div class="live-image-preview-card" id="baseImgPreviewCard">
+              <img id="baseImgPreview" src="" alt="Base layout preview">
+            </div>
+
+            <div class="field-error-msg">Please provide a valid base screenshot or image URL.</div>
           </div>
 
           <div class="form-field">
@@ -2933,21 +3221,38 @@
       <div class="page-container">
         <div class="page-eyebrow">Preferences</div>
         <h1 class="page-title">Settings</h1>
-        <p class="page-quote">“Configure visual preferences, account settings, and profile details.”</p>
+        <p class="page-quote">“Configure visual preferences, account settings, and application options.”</p>
 
-        <!-- Account Profile Panel -->
+        <!-- PWA Install Banner Card (Hidden if installed or unsupported) -->
+        <div class="pwa-card-panel" id="pwaSettingsCard" style="display: none;">
+          <div class="pwa-card-info">
+            <img class="pwa-card-icon" src="https://res.cloudinary.com/prjgzqvy/image/upload/c_fill,w_192,h_192/v1788604860/grok_1788604728310_kefg92.jpg" alt="Base Forge icon">
+            <div>
+              <div style="font-size: 0.95rem; font-weight: 700;">Base Forge App</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">Install on your device for faster access and offline shell.</div>
+            </div>
+          </div>
+          <button class="btn-settings-action" onclick="triggerPwaInstall()">Install App</button>
+        </div>
+
+        <!-- Account Profile Panel with Device Photo Upload -->
         <div class="card-panel" id="settingsProfilePanel" style="display: none;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <div class="card-panel-title" style="margin-bottom: 0;">Your Profile</div>
             <span class="official-badge-pill" id="settingsAdminBadge" style="display: none;">OFFICIAL ADMIN</span>
           </div>
 
-          <!-- Avatar Preview Box -->
+          <!-- Avatar Preview Box & Actions -->
           <div class="avatar-preview-box">
             <img class="avatar-preview-img" id="settingsAvatarPreview" src="" alt="Avatar preview" onerror="this.onerror=null;this.src=CLEAN_FALLBACK_SVG">
             <div>
-              <div style="font-size: 0.88rem; font-weight: 700;" id="settingsPreviewName">Display Name</div>
+              <div style="font-size: 0.92rem; font-weight: 700;" id="settingsPreviewName">Display Name</div>
               <div class="avatar-preview-text" id="settingsPreviewHandle">@username</div>
+              <div class="avatar-action-row">
+                <input type="file" id="profilePhotoInput" style="display: none;" accept="image/jpeg,image/png,image/webp" onchange="handleProfilePhotoUpload(this)">
+                <button type="button" class="btn-settings-action" style="padding: 4px 12px; font-size: 0.74rem;" onclick="document.getElementById('profilePhotoInput').click()">Upload Photo</button>
+                <button type="button" class="btn-settings-action btn-settings-danger" style="padding: 4px 12px; font-size: 0.74rem;" id="btnRemoveAvatar" onclick="handleRemoveAvatar()">Remove</button>
+              </div>
             </div>
           </div>
 
@@ -2960,7 +3265,7 @@
             <input type="text" id="setUsername" class="form-text-input" placeholder="letters_numbers_only" oninput="handleProfileFieldPreview()">
           </div>
           <div class="form-field">
-            <label class="form-caption" for="setAvatarUrl">Avatar URL</label>
+            <label class="form-caption" for="setAvatarUrl">Avatar URL (Optional alternative to device upload)</label>
             <input type="url" id="setAvatarUrl" class="form-text-input" placeholder="https://..." oninput="handleAvatarInputPreview(this.value)">
           </div>
           <div class="form-field">
@@ -3241,7 +3546,8 @@
 
   <!-- ==========================================================================
        FULLSCREEN BASE PREVIEW OVERLAY
-       ========================================================================== -->
+       ========================================================================== */
+  -->
   <div 
     id="fullscreenOverlay" 
     class="fullscreen-overlay" 
@@ -3259,6 +3565,28 @@
     <div class="fullscreen-dialog-box" onclick="event.stopPropagation()">
       <img id="fullscreenImage" class="fullscreen-img" src="" alt="Base layout fullscreen preview">
       <div id="fullscreenCaption" class="fullscreen-caption"></div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       iOS SHARE SHEET PWA INSTRUCTIONS MODAL
+       ========================================================================== -->
+  <div id="iosInstallModal" class="ios-modal-overlay" onclick="closeIosInstallModal(event)">
+    <div class="ios-modal-card" onclick="event.stopPropagation()">
+      <button class="creator-close-btn" onclick="closeIosInstallModal()" aria-label="Close instructions">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <img src="https://res.cloudinary.com/prjgzqvy/image/upload/c_fill,w_192,h_192/v1788604860/grok_1788604728310_kefg92.jpg" alt="Base Forge icon" style="width: 54px; height: 54px; border-radius: 12px; margin: 0 auto 12px;">
+      <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Install Base Forge</h3>
+      <p style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+        To install this app on your iPhone or iPad:<br>
+        1. Tap the <strong>Share</strong> button <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> below.<br>
+        2. Scroll down and tap <strong>Add to Home Screen</strong>.
+      </p>
+      <button class="btn-full-primary" style="height: 40px; font-size: 0.84rem;" onclick="closeIosInstallModal()">Got it</button>
     </div>
   </div>
 
@@ -3353,7 +3681,7 @@
     }
 
     // --------------------------------------------------------------------------
-    // CLIPBOARD CONTROLLER (CANONICAL)
+    // CLIPBOARD CONTROLLER
     // --------------------------------------------------------------------------
     function copyToClipboard(text, onSuccess, onError) {
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -3385,7 +3713,7 @@
     }
 
     // --------------------------------------------------------------------------
-    // SAFE STORAGE HELPERS (DEFENSIVE JSON PARSING)
+    // SAFE STORAGE HELPERS
     // --------------------------------------------------------------------------
     function safeGetJSON(key, fallback) {
       try {
@@ -3450,6 +3778,200 @@
     }
 
     // --------------------------------------------------------------------------
+    // CLIENT-SIDE IMAGE COMPRESSION (DEVICE UPLOADS)
+    // --------------------------------------------------------------------------
+    async function compressImageFile(file, maxDimension = 1920, quality = 0.85) {
+      return new Promise((resolve, reject) => {
+        if (!file.type.startsWith('image/')) {
+          return reject(new Error('Selected file is not an image'));
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxDimension || height > maxDimension) {
+              if (width > height) {
+                height = Math.round((height * maxDimension) / width);
+                width = maxDimension;
+              } else {
+                width = Math.round((width * maxDimension) / height);
+                height = maxDimension;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const outputType = file.type === 'image/png' ? 'image/png' : 'image/webp';
+            canvas.toBlob((blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                resolve(file);
+              }
+            }, outputType, quality);
+          };
+          img.onerror = () => reject(new Error('Failed to decode image'));
+          img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error('Failed to read file from device'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // --------------------------------------------------------------------------
+    // PROFILE PHOTO UPLOAD CONTROLLER
+    // --------------------------------------------------------------------------
+    async function handleProfilePhotoUpload(inputElement) {
+      if (!currentUser || !supabaseClient) {
+        notifyToast('Please log in to upload a photo');
+        return;
+      }
+
+      const file = inputElement.files && inputElement.files[0];
+      if (!file) return;
+
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        notifyToast('Invalid file format. Please choose JPG, PNG, or WebP.');
+        inputElement.value = '';
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        notifyToast('Photo is too large (max 5 MB).');
+        inputElement.value = '';
+        return;
+      }
+
+      notifyToast('Optimizing and uploading avatar...');
+
+      try {
+        const compressedBlob = await compressImageFile(file, 512, 0.9);
+        const fileExt = file.type === 'image/png' ? 'png' : 'webp';
+        const filePath = `${currentUser.id}/avatar_${Date.now()}.${fileExt}`;
+
+        const { error: uploadErr } = await supabaseClient.storage
+          .from('profile-photos')
+          .upload(filePath, compressedBlob, {
+            contentType: fileExt === 'png' ? 'image/png' : 'image/webp',
+            upsert: true
+          });
+
+        if (uploadErr) throw uploadErr;
+
+        const { data: { publicUrl } } = supabaseClient.storage
+          .from('profile-photos')
+          .getPublicUrl(filePath);
+
+        document.getElementById('setAvatarUrl').value = publicUrl;
+        handleAvatarInputPreview(publicUrl);
+
+        await saveProfileChanges();
+        notifyToast('Profile photo updated');
+      } catch (err) {
+        console.error('Avatar upload failed:', err);
+        notifyToast(err.message || 'Failed to upload photo');
+      } finally {
+        inputElement.value = '';
+      }
+    }
+
+    async function handleRemoveAvatar() {
+      if (!currentUser || !supabaseClient) return;
+
+      if (!confirm('Remove your profile photo and restore default avatar?')) return;
+
+      document.getElementById('setAvatarUrl').value = '';
+      handleAvatarInputPreview('');
+      await saveProfileChanges();
+      notifyToast('Avatar removed');
+    }
+
+    // --------------------------------------------------------------------------
+    // BASE IMAGE UPLOAD & DUAL MODE (UPLOAD vs URL)
+    // --------------------------------------------------------------------------
+    let currentBaseImgMode = 'upload';
+    let pendingBaseImageBlob = null;
+    let pendingBaseFileExt = 'webp';
+
+    function switchBaseImgMode(mode) {
+      currentBaseImgMode = mode;
+      const tabUpload = document.getElementById('tabBaseImgUpload');
+      const tabUrl = document.getElementById('tabBaseImgUrl');
+      const uploadZone = document.getElementById('baseUploadZone');
+      const urlFieldWrap = document.getElementById('baseUrlFieldWrap');
+
+      if (mode === 'upload') {
+        tabUpload.classList.add('active');
+        tabUrl.classList.remove('active');
+        uploadZone.style.display = 'block';
+        urlFieldWrap.style.display = 'none';
+      } else {
+        tabUrl.classList.add('active');
+        tabUpload.classList.remove('active');
+        uploadZone.style.display = 'none';
+        urlFieldWrap.style.display = 'block';
+      }
+    }
+
+    async function handleBaseFileChosen(inputElement) {
+      const file = inputElement.files && inputElement.files[0];
+      if (!file) return;
+
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        notifyToast('Invalid screenshot format. Please choose JPG, PNG, or WebP.');
+        inputElement.value = '';
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        notifyToast('File is too large (max 5 MB).');
+        inputElement.value = '';
+        return;
+      }
+
+      try {
+        notifyToast('Reading image...');
+        const compressedBlob = await compressImageFile(file, 1920, 0.85);
+        pendingBaseImageBlob = compressedBlob;
+        pendingBaseFileExt = file.type === 'image/png' ? 'png' : 'webp';
+
+        const previewCard = document.getElementById('baseImgPreviewCard');
+        const previewImg = document.getElementById('baseImgPreview');
+        const previewUrl = URL.createObjectURL(compressedBlob);
+        previewImg.src = previewUrl;
+        previewCard.style.display = 'block';
+        document.getElementById('baseUploadZoneLabel').textContent = `Ready: ${file.name}`;
+      } catch (err) {
+        console.error('Base image processing error:', err);
+        notifyToast('Failed to process image');
+      }
+    }
+
+    function handleBaseUrlInput(url) {
+      const cleaned = sanitizeUrl(url);
+      const previewCard = document.getElementById('baseImgPreviewCard');
+      const previewImg = document.getElementById('baseImgPreview');
+
+      if (cleaned && /^https?:\/\//i.test(cleaned)) {
+        previewImg.src = cleaned;
+        previewCard.style.display = 'block';
+        pendingBaseImageBlob = null;
+      } else {
+        previewCard.style.display = 'none';
+      }
+    }
+
+    // --------------------------------------------------------------------------
     // BASE UNIFICATION
     // --------------------------------------------------------------------------
     function getFullBaseList() {
@@ -3493,6 +4015,8 @@
             name,
             town_hall,
             type,
+            purpose,
+            defensive_focus,
             description,
             tags,
             image,
@@ -3522,6 +4046,8 @@
             name: String(row.name || 'Clash Base'),
             townHall: Number(row.town_hall) || 16,
             type: String(row.type || 'War'),
+            purpose: String(row.purpose || row.type || 'Anti 3-Star'),
+            defensiveFocus: String(row.defensive_focus || ''),
             description: String(row.description || ''),
             tags: Array.isArray(row.tags) ? row.tags : [],
             image: sanitizeUrl(row.image),
@@ -3543,10 +4069,6 @@
         refreshCurrentView();
       } catch (err) {
         console.error("Base Forge operation failed:", err);
-        console.error("Error name:", err?.name);
-        console.error("Error message:", err?.message);
-        console.error("Error stack:", err?.stack);
-
         basesFetchError = err.message || 'Database connection error';
         isBasesLoading = false;
 
@@ -4056,6 +4578,14 @@
       document.getElementById('dMetaBadge').textContent = `TH${base.townHall} \u2022 ${baseType}`;
       document.getElementById('detailBreadcrumb').textContent = `Explore / TH${base.townHall} / ${base.type || 'War'}`;
 
+      const purposeBadge = document.getElementById('dPurposeBadge');
+      if (base.purpose) {
+        purposeBadge.textContent = base.purpose.toUpperCase();
+        purposeBadge.style.display = 'inline-block';
+      } else {
+        purposeBadge.style.display = 'none';
+      }
+
       const statusBadge = document.getElementById('dStatusBadge');
       if (base.status === 'draft') {
         statusBadge.style.display = 'inline-block';
@@ -4069,11 +4599,16 @@
 
       document.getElementById('dInfoTH').textContent = `TH${base.townHall}`;
       document.getElementById('dInfoType').textContent = base.type || "War";
-      document.getElementById('dInfoPurpose').textContent = 
-        base.type === 'War' ? 'Clan War' :
-        base.type === 'CWL' ? 'Clan War Leagues' :
-        base.type === 'Farming' ? 'Resource Protection' :
-        base.type === 'Trophy' ? 'Trophy Push' : 'Balanced Defense';
+      document.getElementById('dInfoPurpose').textContent = base.purpose || 'Balanced War Defense';
+
+      const focusBlock = document.getElementById('dDefensiveFocusBlock');
+      const focusText = document.getElementById('dDefensiveFocus');
+      if (base.defensiveFocus) {
+        focusBlock.style.display = 'block';
+        focusText.textContent = base.defensiveFocus;
+      } else {
+        focusBlock.style.display = 'none';
+      }
 
       const tags = (base.tags && base.tags.length) ? base.tags : ["Clan War", "Strong Defense"];
       document.getElementById('dTags').innerHTML = tags.map(t => `<span class="tag-badge">${escapeHtml(t)}</span>`).join('');
@@ -4234,6 +4769,7 @@
             <div class="sub-item-meta">
               <span class="status-badge-chip ${b.status === 'published' ? 'status-published' : 'status-draft'}">${b.status}</span>
               <span>TH${b.townHall} &bull; ${b.type}</span>
+              ${b.purpose ? `<span>&bull; ${escapeHtml(b.purpose)}</span>` : ''}
               ${isAdmin && b.creatorId !== currentUser.id ? '<span>&bull; Other User Base</span>' : ''}
             </div>
           </div>
@@ -4270,12 +4806,17 @@
       document.getElementById('subName').value = base.name;
       document.getElementById('subTH').value = base.townHall;
       document.getElementById('subPurpose').value = base.type;
+      document.getElementById('subTacticalPurpose').value = base.purpose || 'Anti 3-Star';
+      document.getElementById('subDefFocus').value = base.defensiveFocus || '';
       document.getElementById('subLink').value = base.baseLink;
       document.getElementById('subDesc').value = base.description || '';
       document.getElementById('subTags').value = (base.tags || []).join(', ');
+      
+      switchBaseImgMode('url');
       document.getElementById('subImg').value = base.image;
-      document.getElementById('subStatus').value = base.status || 'published';
+      handleBaseUrlInput(base.image);
 
+      document.getElementById('subStatus').value = base.status || 'published';
       document.getElementById('subSubmitBtn').textContent = 'Update Base';
       document.getElementById('subCancelEditBtn').style.display = 'inline-block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4284,6 +4825,11 @@
     function cancelBaseEdit() {
       document.getElementById('baseSubmitForm').reset();
       document.getElementById('subEditId').value = '';
+      pendingBaseImageBlob = null;
+      document.getElementById('baseImgPreviewCard').style.display = 'none';
+      document.getElementById('baseUploadZoneLabel').textContent = 'Tap to select layout screenshot';
+      switchBaseImgMode('upload');
+
       document.getElementById('formPageEyebrow').textContent = 'Create';
       document.getElementById('formPageTitle').textContent = 'Publish a base.';
       document.getElementById('subSubmitBtn').textContent = 'Save & Publish';
@@ -4335,9 +4881,11 @@
       const name = document.getElementById('subName').value.trim();
       const townHall = Number(document.getElementById('subTH').value);
       const type = document.getElementById('subPurpose').value;
+      const purpose = document.getElementById('subTacticalPurpose').value;
+      const defFocus = document.getElementById('subDefFocus').value.trim();
       const description = document.getElementById('subDesc').value.trim();
       const baseLink = sanitizeUrl(document.getElementById('subLink').value);
-      const image = sanitizeUrl(document.getElementById('subImg').value);
+      const rawUrlImg = sanitizeUrl(document.getElementById('subImg').value);
       const status = document.getElementById('subStatus').value;
       
       let isValid = true;
@@ -4358,7 +4906,10 @@
       }
 
       const fieldImg = document.getElementById('field-img');
-      if (!image || !/^https?:\/\//i.test(image)) {
+      const hasUploadedBlob = Boolean(pendingBaseImageBlob);
+      const hasValidUrl = rawUrlImg && /^https?:\/\//i.test(rawUrlImg);
+
+      if (!hasUploadedBlob && !hasValidUrl && !editId) {
         fieldImg.classList.add('has-error');
         isValid = false;
       } else {
@@ -4368,27 +4919,53 @@
       if (!isValid) return;
 
       let rawTags = document.getElementById('subTags').value.split(',').map(t => t.trim()).filter(Boolean);
-      if (rawTags.length === 0) rawTags = [type, `TH${townHall}`, "Strong Defense"];
+      if (rawTags.length === 0) rawTags = [type, purpose, `TH${townHall}`, "Strong Defense"];
 
       const submitBtn = document.getElementById('subSubmitBtn');
       submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading layout...';
 
       try {
         const isAdmin = isUserAdmin();
+        let finalImageUrl = rawUrlImg;
+
+        if (pendingBaseImageBlob) {
+          const baseFileId = editId || `b_${Date.now()}`;
+          const filePath = `${currentUser.id}/${baseFileId}_${Date.now()}.${pendingBaseFileExt}`;
+
+          const { error: uploadErr } = await supabaseClient.storage
+            .from('base-images')
+            .upload(filePath, pendingBaseImageBlob, {
+              contentType: pendingBaseFileExt === 'png' ? 'image/png' : 'image/webp',
+              upsert: true
+            });
+
+          if (uploadErr) throw uploadErr;
+
+          const { data: { publicUrl } } = supabaseClient.storage
+            .from('base-images')
+            .getPublicUrl(filePath);
+
+          finalImageUrl = publicUrl;
+        }
 
         if (editId) {
+          const updatePayload = {
+            name,
+            town_hall: townHall,
+            type,
+            purpose,
+            defensive_focus: defFocus,
+            description,
+            tags: rawTags.slice(0, 6),
+            base_link: baseLink,
+            status
+          };
+          if (finalImageUrl) updatePayload.image = finalImageUrl;
+
           let query = supabaseClient
             .from('bases')
-            .update({
-              name,
-              town_hall: townHall,
-              type,
-              description,
-              tags: rawTags.slice(0, 5),
-              image,
-              base_link: baseLink,
-              status
-            })
+            .update(updatePayload)
             .eq('id', editId);
 
           if (!isAdmin) {
@@ -4409,9 +4986,11 @@
               name,
               town_hall: townHall,
               type,
+              purpose,
+              defensive_focus: defFocus,
               description,
-              tags: rawTags.slice(0, 5),
-              image,
+              tags: rawTags.slice(0, 6),
+              image: finalImageUrl || CLEAN_FALLBACK_SVG,
               base_link: baseLink,
               status,
               creator_id: currentUser.id,
@@ -4420,7 +4999,7 @@
 
           if (error) throw error;
           notifyToast(status === 'published' ? 'Base published successfully' : 'Draft saved');
-          document.getElementById('baseSubmitForm').reset();
+          cancelBaseEdit();
         }
 
         await loadBasesFromSupabase();
@@ -4430,6 +5009,7 @@
         notifyToast(err.message || 'Failed to save base');
       } finally {
         submitBtn.disabled = false;
+        submitBtn.textContent = 'Save & Publish';
       }
     }
 
@@ -4560,7 +5140,7 @@
               <span class="card-author-text">${escapeHtml(item.creatorName)}</span>
             </div>
             <h3 class="card-title" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</h3>
-            <p class="card-short-desc">${escapeHtml(item.description || 'Defensive base layout.')}</p>
+            <p class="card-short-desc">${escapeHtml(item.description || item.defensiveFocus || 'Defensive base layout.')}</p>
             <div class="card-tags">${tagsMarkup}</div>
             <button 
               class="btn-card-copy" 
@@ -4705,6 +5285,8 @@
           const matchesTokens = tokens.every(token => {
             return (base.name || '').toLowerCase().includes(token) ||
                    (base.description || '').toLowerCase().includes(token) ||
+                   (base.purpose || '').toLowerCase().includes(token) ||
+                   (base.defensiveFocus || '').toLowerCase().includes(token) ||
                    baseType.includes(token) ||
                    tagsStr.includes(token) ||
                    thStr === token ||
@@ -5078,6 +5660,8 @@
           closeFullscreenPreview();
         } else if (document.getElementById('authModalOverlay') && document.getElementById('authModalOverlay').classList.contains('open')) {
           closeAuthModal();
+        } else if (document.getElementById('iosInstallModal') && document.getElementById('iosInstallModal').classList.contains('open')) {
+          closeIosInstallModal();
         }
       }
     });
@@ -5125,6 +5709,8 @@
       } else {
         profilePanel.style.display = 'none';
       }
+
+      updatePwaUiState();
     }
 
     function setThemePreference(mode) {
@@ -5147,7 +5733,7 @@
 
     function exportAppData() {
       const data = {
-        version: "2.2.0",
+        version: "2.4.0",
         exportDate: new Date().toISOString(),
         saved: getSavedList(),
         recent: getRecentlyViewedIds(),
@@ -5201,6 +5787,14 @@
       }
       document.documentElement.setAttribute('data-theme', resolved);
       syncThemeIcon(resolved);
+      syncMetaThemeColor(resolved);
+    }
+
+    function syncMetaThemeColor(resolvedTheme) {
+      const meta = document.getElementById('metaThemeColor');
+      if (meta) {
+        meta.setAttribute('content', resolvedTheme === 'dark' ? '#141613' : '#3E5437');
+      }
     }
 
     function initTheme() {
@@ -5247,10 +5841,128 @@
     }
 
     // --------------------------------------------------------------------------
-    // 15. APP INITIALIZATION
+    // 15. PROGRESSIVE WEB APP (PWA) CONTROLLER
+    // --------------------------------------------------------------------------
+    let deferredPrompt = null;
+
+    function isPwaInstalled() {
+      if (window.matchMedia('(display-mode: standalone)').matches) return true;
+      if (window.navigator.standalone === true) return true;
+      return false;
+    }
+
+    function updatePwaUiState() {
+      const headerBtn = document.getElementById('headerPwaInstallBtn');
+      const settingsCard = document.getElementById('pwaSettingsCard');
+      const isInstalled = isPwaInstalled();
+
+      if (isInstalled) {
+        if (headerBtn) headerBtn.style.display = 'none';
+        if (settingsCard) settingsCard.style.display = 'none';
+        return;
+      }
+
+      // Check for iOS Safari
+      const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+
+      if (deferredPrompt) {
+        if (headerBtn) headerBtn.style.display = 'inline-flex';
+        if (settingsCard) settingsCard.style.display = 'flex';
+      } else if (isIos) {
+        // Provide install guidance on iOS devices if not yet in standalone mode
+        if (settingsCard) settingsCard.style.display = 'flex';
+        if (headerBtn) headerBtn.style.display = 'none';
+      } else {
+        if (headerBtn) headerBtn.style.display = 'none';
+        if (settingsCard) settingsCard.style.display = 'none';
+      }
+    }
+
+    async function triggerPwaInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          deferredPrompt = null;
+          updatePwaUiState();
+        }
+      } else {
+        const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+        if (isIos) {
+          openIosInstallModal();
+        } else {
+          notifyToast('To install: use your browser menu and choose "Install App" or "Add to Home Screen".');
+        }
+      }
+    }
+
+    function openIosInstallModal() {
+      const modal = document.getElementById('iosInstallModal');
+      if (modal) modal.classList.add('open');
+    }
+
+    function closeIosInstallModal() {
+      const modal = document.getElementById('iosInstallModal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      updatePwaUiState();
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      notifyToast('Base Forge installed successfully');
+      updatePwaUiState();
+    });
+
+    // Connection listener
+    window.addEventListener('online', () => {
+      const banner = document.getElementById('offlineBanner');
+      if (banner) banner.classList.remove('active');
+      notifyToast('Back online');
+      loadBasesFromSupabase();
+    });
+
+    window.addEventListener('offline', () => {
+      const banner = document.getElementById('offlineBanner');
+      if (banner) banner.classList.add('active');
+    });
+
+    function registerServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js', { scope: './' })
+          .then((reg) => {
+            reg.onupdatefound = () => {
+              const installing = reg.installing;
+              if (installing) {
+                installing.onstatechange = () => {
+                  if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+                    notifyToast('App update available. Reloading...');
+                    setTimeout(() => window.location.reload(), 1500);
+                  }
+                };
+              }
+            };
+          })
+          .catch((err) => {
+            console.warn('[BaseForge PWA] Worker registration failed (app still functional):', err);
+          });
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // 16. APP INITIALIZATION
     // --------------------------------------------------------------------------
     window.addEventListener('DOMContentLoaded', async () => {
       initTheme();
+
+      if (!navigator.onLine) {
+        const banner = document.getElementById('offlineBanner');
+        if (banner) banner.classList.add('active');
+      }
 
       const initialHash = window.location.hash.replace('#', '');
       let pendingDetailId = null;
@@ -5276,6 +5988,10 @@
       } else if (pendingCreatorUsername) {
         navigateTo('creator-profile', pendingCreatorUsername);
       }
+
+      // Register PWA service worker smoothly in background
+      registerServiceWorker();
+      updatePwaUiState();
     });
   </script>
 </body>
